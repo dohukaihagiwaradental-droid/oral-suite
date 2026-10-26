@@ -313,7 +313,7 @@ input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
         <div class="ref-h">① 口腔機能低下症（成人・高齢者）</div>
         検査7項目の数値を入力 → 該当／非該当を自動判定。実施項目のうち3項目以上該当で「判定基準を満たす」と表示（診断は医師）。前提（50歳以上 or 全身疾患による機能低下 ＋ 歯科疾患管理料）を満たすと「算定候補」に管理料1/2・検査点数が表示。「印刷 / PDF」で結果シートをA4出力。<br><span class="sub">※患者にお渡しする印刷物には算定点数は出ません（検査値・判定のみ）。点数は画面上の「算定候補」でスタッフが確認します。</span>
         <div class="ref-h">② 口腔機能発達不全症（小児）</div>
-        離乳完了前／後を選択 → C項目チェックで診断・算定要件を自動判定（食べる＋話すで2項目以上＝診断、その他含め3項目以上＝管理料の算定要件）。カウプ／ローレル指数も自動計算。「印刷 / PDF」でチェックシート（カルテ添付）＋管理計画表（保護者用・様式1）の2枚をA4出力。
+        離乳完了前／後を選択 → C項目チェックで診断・算定要件を自動判定（食べる＋話すで2項目以上・うち1つは必須の項目＝診断。2項目＝管理料2、3項目以上＝管理料1の区分を表示）。カウプ／ローレル指数も自動計算。「印刷 / PDF」でチェックシート（カルテ添付）＋管理計画表（保護者用・様式1）の2枚をA4出力。
         <div class="ref-h">③ 算定リファレンス（スタッフ用）</div>
         成人・小児の検査／管理点数、同時算定の組み合わせ、月次イメージを一覧で確認できる閲覧専用資料。診断・算定とは別の業務参考資料で、患者へ渡す資料ではありません。
         <div class="ref-h">設定（マスタ管理）</div>
@@ -485,7 +485,7 @@ input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
     <div class="card">
       <div class="card-h"><span class="ico">基</span><h2>基本情報</h2><span class="hint" id="lowSaveStat">自動保存</span></div>
       <div class="grid c3">
-        <div class="field"><label>お名前</label><input id="lf_name" placeholder="氏名"></div>
+        <div class="field"><label>お名前（イニシャル推奨）</label><input id="lf_name" placeholder="例：H.T."></div>
         <div class="field"><label>カルテ No.</label><input id="lf_no" placeholder="No." inputmode="numeric"></div>
         <div class="field"><label>検査日</label><input id="lf_date" type="date"></div>
       </div>
@@ -536,7 +536,7 @@ input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
     <div class="card">
       <div class="card-h"><span class="ico">基</span><h2>基本情報</h2><span class="hint" id="saveStat">自動保存</span></div>
       <div class="grid c3">
-        <div class="field"><label>お名前</label><input id="f_name" placeholder="氏名"></div>
+        <div class="field"><label>お名前（イニシャル推奨）</label><input id="f_name" placeholder="例：H.T."></div>
         <div class="field"><label>カルテ No.</label><input id="f_no" placeholder="No." inputmode="numeric"></div>
         <div class="field"><label>記入日</label><input id="f_date" type="date"></div>
       </div>
@@ -742,7 +742,7 @@ const DEV=(function(){
 const ITEMS={
   pre:[
     {fn:'食べる',cls:'哺乳',list:[
-      {c:'C1',t:'先天歯がある',grp:'eat',k:'その他'},
+      {c:'C1',t:'先天性歯がある',grp:'eat',k:'その他'},
       {c:'C2',t:'口唇・歯槽の形態に異常がある',grp:'eat',k:'その他'},
       {c:'C3',t:'舌小帯に異常がある',grp:'eat',k:'その他'},
       {c:'C4',t:'乳首をしっかり口に含むことができない',grp:'eat',k:'食行動'},
@@ -752,7 +752,7 @@ const ITEMS={
     {fn:'食べる',cls:'離乳',list:[
       {c:'C7',t:'開始しているが首のすわりが確認できない',grp:'eat',k:'食行動'},
       {c:'C8',t:'スプーンを舌で押し出す状態がみられる',grp:'eat',k:'嚥下機能'},
-      {c:'C9',t:'離乳食が進まない',grp:'eat',k:'食行動'},
+      {c:'C9',t:'離乳が進まない',grp:'eat',k:'食行動'},
     ]},
     {fn:'話す',cls:'構音機能',list:[
       {c:'C10',t:'口唇の閉鎖不全がある（安静時に口唇閉鎖を認めない）',grp:'talk',k:'構音機能'},
@@ -775,13 +775,13 @@ const ITEMS={
       {c:'C6',t:'偏咀嚼がある',grp:'eat',k:'咀嚼機能'},
     ]},
     {fn:'食べる',cls:'嚥下機能',list:[
-      {c:'C7',t:'舌の突出（乳幼児嚥下の残存）がみられる',grp:'eat',k:'嚥下機能'},
+      {c:'C7',t:'舌の突出（乳児嚥下の残存）がみられる',grp:'eat',k:'嚥下機能'},
     ]},
     {fn:'食べる',cls:'食行動',list:[
       {c:'C8',t:'哺乳量・食べる量、回数が多すぎたり少なすぎたりムラがある等',grp:'eat',k:'食行動'},
     ]},
     {fn:'話す',cls:'構音機能',list:[
-      {c:'C9',t:'構音に障害がある（音の置換、省略、たわみなどがある）',grp:'talk',k:'構音機能'},
+      {c:'C9',t:'構音に障害がある（音の置換、省略、歪みなどがある）',grp:'talk',k:'構音機能'},
       {c:'C10',t:'口唇閉鎖不全がある（安静時に口唇閉鎖を認めない）',grp:'talk',k:'構音機能'},
       {c:'C11',t:'口腔習癖がある',grp:'talk',k:'習癖'},
       {c:'C12',t:'舌小帯に異常がある',grp:'talk',k:'構音機能'},
@@ -793,7 +793,8 @@ const ITEMS={
       {c:'C14',t:'口呼吸がある',grp:'other',k:'習癖'},
       {c:'C15',t:'口蓋扁桃などに肥大がある',grp:'other',k:'その他'},
       {c:'C16',t:'睡眠時のいびきがある',grp:'other',k:'その他'},
-      {c:'C17',t:'上記以外の問題点',grp:'other',k:'その他',memo:true},
+      {c:'C17',t:'舌を口蓋に押しつける力が弱い（低舌圧である）',grp:'other',k:'その他'},
+      {c:'C18',t:'上記以外の問題点',grp:'other',k:'その他',memo:true},
     ]},
   ]
 };
@@ -805,7 +806,7 @@ let mode='post';
 let state=loadState();
 const K=c=>mode+':'+c;
 function blankState(){return {mode:'post',checks:{},extra:{},fields:{},groups:{},funcOverride:{}};}
-function loadState(){try{const s=JSON.parse(localStorage.getItem(STORE));return s&&s.mode?s:blankState();}catch(e){return blankState();}}
+function loadState(){try{const s=JSON.parse(localStorage.getItem(STORE));if(s&&s.extra&&s.extra['post:C17_memo']!==undefined&&s.checks&&!s.checks['post:C18']){s.checks['post:C18']=s.checks['post:C17'];delete s.checks['post:C17'];s.extra['post:C18_memo']=s.extra['post:C17_memo'];delete s.extra['post:C17_memo'];}return s&&s.mode?s:blankState();}catch(e){return blankState();}}
 function save(){state.mode=mode;localStorage.setItem(STORE,JSON.stringify(state));flash();}
 let flashT;
 function flash(){const el=document.getElementById('saveStat');if(!el)return;el.textContent='保存しました';el.style.color='var(--mint4)';clearTimeout(flashT);flashT=setTimeout(()=>{el.textContent='自動保存';el.style.color='';},1200);}
@@ -870,17 +871,21 @@ function toggle(c){
   judge();renderFuncTags();save();
 }
 function judge(){
-  let dx=0,all=0;
-  ITEMS[mode].forEach(g=>g.list.forEach(it=>{if(state.checks[K(it.c)]){all++;if(it.grp==='eat'||it.grp==='talk')dx++;}}));
+  let dx=0,all=0,must=0;
+  ITEMS[mode].forEach(g=>g.list.forEach(it=>{if(state.checks[K(it.c)]){all++;if(it.grp==='eat'||it.grp==='talk'){dx++;if(parseInt(it.c.slice(1),10)<=(mode==='pre'?9:6))must++;}}}));
   document.getElementById('cntDx').textContent=dx;document.getElementById('cntAll').textContent=all;
   const v=document.getElementById('verdict');v.className='j-verdict';
-  if(dx>=2){
-    const santei=all>=3;v.classList.add('dx');if(santei)v.classList.add('santei');
+  const mustLbl=mode==='pre'?'C1〜C9（哺乳・離乳）':'C1〜C6（咀嚼）';
+  if(dx>=2&&must>=1){
+    v.classList.add('dx');v.classList.add('santei');
     v.innerHTML='【口腔機能発達不全症】の診断基準に該当（食べる＋話す '+dx+'項目）'
-      +'<small>'+(santei?'＋その他を含め'+all+'項目該当 → 小児口腔機能管理料の算定要件（3項目以上）を満たします':'算定要件は「その他」含め3項目以上が必要（現在'+all+'項目）')+'</small>';
+      +'<small>評価項目 '+dx+'項目 → 小児口腔機能管理料'+(dx>=3?'1（3項目以上）':'2（2項目）')+'の区分。「その他」は項目数に含めていません</small>';
+  }else if(dx>=2){
+    v.classList.add('neg');
+    v.innerHTML='診断基準に未到達：必須の項目（'+mustLbl+'）が含まれていません<small>「食べる」「話す」で2項目以上、うち1つは'+mustLbl+'が必要です</small>';
   }else{
     v.classList.add('neg');
-    v.innerHTML='診断基準（食べる＋話す 2項目以上）に未到達（現在'+dx+'項目）<small>「食べる機能」「話す機能」の項目で2つ以上の該当があると口腔機能発達不全症と診断</small>';
+    v.innerHTML='診断基準（食べる＋話す 2項目以上）に未到達（現在'+dx+'項目）<small>2項目以上、うち1つは'+mustLbl+'で口腔機能発達不全症と診断</small>';
   }
 }
 function renderFuncTags(){
@@ -925,9 +930,9 @@ function FUNC_GOAL(arr){arr=arr||[];return GOAL_ALL.map(x=>bx(arr.includes(x))+x
 function FUNC_PLAN(arr){arr=arr||[];return PLAN_ALL.map(x=>bx(arr.includes(x))+x).join('　');}
 function buildPrint(){
   const f=state.fields,g=state.groups;const today=f.f_date||new Date().toISOString().slice(0,10);
-  let dx=0,all=0;
-  ITEMS[mode].forEach(grp=>grp.list.forEach(it=>{if(state.checks[K(it.c)]){all++;if(it.grp!=='other')dx++;}}));
-  const dxPos=dx>=2;const santei=dxPos&&all>=3;
+  let dx=0,all=0,must=0;
+  ITEMS[mode].forEach(grp=>grp.list.forEach(it=>{if(state.checks[K(it.c)]){all++;if(it.grp!=='other'){dx++;if(parseInt(it.c.slice(1),10)<=(mode==='pre'?9:6))must++;}}}));
+  const dxPos=dx>=2&&must>=1;const santei=dxPos;
   const kaup=(()=>{const cw=parseFloat(state.extra.cw),ch=parseFloat(state.extra.ch);return(cw>0&&ch>0)?((cw*1000)/(ch*ch)*10).toFixed(1):'';})();
   const rohrer=(()=>{const cw=parseFloat(state.extra.cw),ch=parseFloat(state.extra.ch);if(!(cw>0&&ch>0))return'';const m=ch/100;return(cw/(m*m*m)*10).toFixed(1);})();
   const funcs=activeFuncTags();
@@ -945,7 +950,7 @@ function buildPrint(){
     s1+='</div></div>';
   });
   s1+='<div class="pd-row"><div class="lbl">判定</div><div class="val">食べる＋話す：<b>'+dx+'</b> 項目該当　／　全体（その他含む）：<b>'+all+'</b> 項目該当<br>'
-    +bx(dxPos)+'口腔機能発達不全症の診断基準に該当（2項目以上）　'+bx(santei)+'小児口腔機能管理料 算定要件を満たす（その他含め3項目以上）</div></div>';
+    +bx(dxPos)+'口腔機能発達不全症の診断基準に該当（2項目以上・必須を含む）　'+bx(dxPos&&dx>=3)+'評価項目3項目以上　'+bx(dxPos&&dx===2)+'評価項目2項目</div></div>';
   if(f.m_lip)s1+='<div class="pd-row"><div class="lbl">口唇閉鎖力</div><div class="val">'+f.m_lip+' N</div></div>';
   s1+='<div class="pd-foot"><span>医療機関名：'+(f.m_clinic||'')+'</span><span>担当歯科医師：'+(f.m_doctor||'')+'</span></div>';
   s1+='<div class="pd-note">※本シートは日本歯科医学会／日本小児歯科学会の評価基準に基づく院内記録です。診断は担当歯科医師が総合的に判断します。</div></div>';
