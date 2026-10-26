@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>口腔機能発達不全症ツール</title>
+<meta name="theme-color" content="#2d8f70">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest-dev.json">
+<style>#view-home,#view-low,#view-ref,#view-help,#btnBack,#btnSettings{display:none!important}</style>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="口腔機能管理">
+<style>
+/* =========================================================
+   口腔機能管理ツール（統合）院内業務用・外部送信なし・ローカル完結
+   ① 口腔機能低下症（成人・高齢者） ② 口腔機能発達不全症（小児）
+   ========================================================= */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --mint:#e8f5f0;--mint2:#c7e3d5;--mint4:#2d8f70;--mintDeep:#1f6b53;
+  --warm:#fdfaf4;--warm2:#f5ead6;
+  --accent:#e8773a;--accent2:#c45f25;
+  --blue:#3a6ea8;--blue2:#2b5687;--blueSoft:#e9f0f8;
+  --navy:#1a3a4a;--ink:#12313f;--text:#2c4a3e;--muted:#5a7a70;
+  --line:#dbe6e0;--paper:#fff;--bg:#eef4f1;
+  --ok:#2d8f70;--warn:#e8773a;--danger:#c0392b;
+  --radius:14px;--radius-sm:9px;
+}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;color:var(--text);background:var(--bg);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+h1,h2,h3{color:var(--navy);font-weight:700;line-height:1.45}
+button{font-family:inherit;cursor:pointer;border:none}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+
+/* ===== TOP BAR ===== */
+.topbar{position:sticky;top:0;z-index:50;background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.topbar h1{color:#fff;font-size:16px;font-weight:700;flex:1;line-height:1.3}
+.topbar h1 small{display:block;font-size:11px;font-weight:400;color:rgba(255,255,255,.6);margin-top:2px}
+.tb-btn{background:rgba(255,255,255,.12);color:#fff;padding:10px 15px;border-radius:999px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;min-height:44px;transition:background .15s;white-space:nowrap}
+.tb-btn:active{background:rgba(255,255,255,.28)}
+.tb-btn.print{background:var(--accent)}
+.tb-btn.print:active{background:var(--accent2)}
+
+/* ===== LAYOUT ===== */
+.wrap{max-width:1100px;margin:0 auto;padding:18px 16px 130px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px 18px;margin-bottom:18px;box-shadow:0 1px 3px rgba(26,58,74,.04)}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--mint)}
+.card-h .ico{width:30px;height:30px;border-radius:8px;background:var(--mint);color:var(--mint4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:none}
+.card-h h2{font-size:17px;color:var(--navy)}
+.card-h .hint{margin-left:auto;font-size:12px;color:var(--muted);font-weight:500}
+.view{display:none}
+.view.active{display:block}
+
+/* ===== HOME LAUNCHER ===== */
+.home-wrap{max-width:760px;margin:0 auto;padding:30px 18px 60px}
+.home-lead{text-align:center;margin-bottom:26px}
+.home-lead h2{font-size:20px;margin-bottom:6px}
+.home-lead p{font-size:13px;color:var(--muted)}
+.launch{display:grid;gap:16px}
+.launch-btn{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:22px 22px;box-shadow:0 2px 8px rgba(26,58,74,.06);transition:transform .12s,box-shadow .12s,border-color .12s}
+.launch-btn:active{transform:scale(.99)}
+.launch-btn .bigico{width:58px;height:58px;border-radius:15px;flex:none;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff}
+.launch-btn.low .bigico{background:linear-gradient(135deg,#3a6ea8,#2b5687)}
+.launch-btn.dev .bigico{background:linear-gradient(135deg,#2d8f70,#1f6b53)}
+.launch-btn.low{border-color:#cfe0f0}
+.launch-btn.low:active{border-color:var(--blue)}
+.launch-btn.dev:active{border-color:var(--mint4)}
+.launch-btn .ltxt b{display:block;font-size:18px;color:var(--navy);font-weight:700}
+.launch-btn .ltxt span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+.launch-btn.ref .bigico{background:linear-gradient(135deg,#e8773a,#c75f28)}
+.launch-btn.ref{border-color:#f3d9c6}
+.launch-btn.ref:active{border-color:var(--accent)}
+.launch-btn.help .bigico{background:linear-gradient(135deg,#6b7a86,#48555f)}
+.launch-btn.help{border-color:#dbe2e7}
+.launch-btn.help:active{border-color:var(--navy)}
+.help-doc{font-size:14px;line-height:1.85;color:var(--text)}
+.help-doc ol{margin:4px 0 4px 1.3em;padding:0}
+.help-doc li{margin:3px 0}
+.help-doc .sub{color:var(--muted);font-size:12.5px}
+.reftbl{width:100%;border-collapse:collapse;margin:4px 0 2px;font-size:13.5px}
+.reftbl th,.reftbl td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top;line-height:1.5}
+.reftbl th{background:#f3efe9;font-weight:700;color:var(--navy);white-space:nowrap}
+.reftbl td.pt{text-align:right;white-space:nowrap;font-weight:800;color:var(--navy)}
+.reftbl .tag{display:inline-block;font-size:11px;background:#fbe6da;color:#c75f28;border-radius:6px;padding:1px 6px;margin-left:6px}
+.ref-h{font-weight:700;color:var(--navy);margin:16px 0 6px;font-size:14.5px}
+.ref-combo{background:#f6faf7;border:1px solid #d9ebe2;border-radius:10px;padding:11px 13px;margin:8px 0;font-size:13.5px;line-height:1.85}
+.ref-combo .ng{color:#c0392b;font-weight:700}
+.ref-month .reftbl td{font-size:13px}
+.ref-disc{font-size:12px;color:var(--muted);line-height:1.7;margin-top:10px;border-top:1px dashed var(--line);padding-top:10px}
+.home-note{margin-top:24px;background:var(--warm);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 15px;font-size:12px;color:var(--text);line-height:1.7}
+
+/* ===== BASIC INFO GRID ===== */
+.grid{display:grid;gap:14px}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:repeat(3,1fr)}
+.grid.c4{grid-template-columns:repeat(4,1fr)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.field input,.field select,.field textarea{border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:12px 13px;background:#fdfefe;min-height:48px;transition:border-color .15s,box-shadow .15s;width:100%}
+.field textarea{min-height:70px;resize:vertical;line-height:1.7}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--mint4);box-shadow:0 0 0 3px rgba(45,143,112,.14)}
+.field .unit{position:relative}
+.field .unit input{padding-right:46px}
+.field .unit .u{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted);pointer-events:none}
+
+/* ===== MODE SWITCH (dev) ===== */
+.modesw{display:flex;gap:0;background:var(--mint);border-radius:999px;padding:5px;margin-bottom:4px}
+.modesw button{flex:1;background:transparent;color:var(--muted);padding:13px;border-radius:999px;font-size:14.5px;font-weight:700;min-height:50px;transition:all .15s}
+.modesw button.on{background:var(--mint4);color:#fff;box-shadow:0 2px 8px rgba(45,143,112,.3)}
+.mode-age{font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px}
+
+/* ===== CHECK ITEMS (dev) ===== */
+.catgrp{margin-bottom:18px}
+.catgrp:last-child{margin-bottom:0}
+.cat-label{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--mint4);margin-bottom:10px;padding:4px 12px;background:var(--mint);border-radius:999px}
+.cat-label .fn{color:var(--muted);font-weight:600;font-size:11.5px}
+.citem{display:flex;align-items:flex-start;gap:13px;border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:14px 15px;margin-bottom:9px;background:#fff;cursor:pointer;transition:all .12s;user-select:none}
+.citem:active{transform:scale(.992)}
+.citem.on{border-color:var(--mint4);background:var(--mint)}
+.citem .box{width:26px;height:26px;border:2px solid var(--mint2);border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .12s;background:#fff}
+.citem.on .box{background:var(--mint4);border-color:var(--mint4)}
+.citem .box svg{width:16px;height:16px;color:#fff;opacity:0;transition:opacity .12s}
+.citem.on .box svg{opacity:1}
+.citem .txt{flex:1;font-size:14.5px;line-height:1.55;color:var(--ink)}
+.citem .code{font-size:11px;font-weight:700;color:var(--mint4);margin-right:7px;font-variant-numeric:tabular-nums}
+.citem.on .txt{font-weight:600}
+.citem-extra{margin:-3px 0 9px 39px;display:grid;gap:10px}
+.citem-extra .grid{margin-top:2px}
+.idx-box{background:var(--warm);border:1.5px solid var(--warm2);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px}
+.idx-box .res{font-size:14px;font-weight:700;color:var(--accent2)}
+.idx-box .res b{font-size:19px;font-variant-numeric:tabular-nums}
+.idx-j{display:inline-block;font-size:12.5px;font-weight:700;padding:3px 11px;border-radius:999px;margin-left:4px;background:#eee;color:#777}
+.idx-j.ok{background:#e3f3ec;color:var(--mintDeep)}
+.idx-j.warn{background:#fdeede;color:var(--accent2)}
+.idx-j.danger{background:#fbe6e3;color:var(--danger)}
+
+/* ===== LOW EXAM ITEMS ===== */
+.exam{border:1.5px solid var(--line);border-radius:var(--radius-sm);margin-bottom:13px;overflow:hidden}
+.exam-h{display:flex;align-items:center;gap:11px;padding:13px 15px;background:var(--blueSoft);border-bottom:1px solid var(--line)}
+.exam-h .num{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex:none}
+.exam-h .nm{flex:1;font-size:15px;font-weight:700;color:var(--navy)}
+.exam-h .stat{font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;background:#eef1f0;color:var(--muted);white-space:nowrap}
+.exam-h .stat.hit{background:#fbe6e3;color:var(--danger)}
+.exam-h .stat.miss{background:#e3f3ec;color:var(--mintDeep)}
+.exam-b{padding:13px 15px;display:grid;gap:14px}
+.method{display:grid;gap:8px}
+.method>.mlabel{font-size:13px;font-weight:700;color:var(--ink)}
+.method .mdesc{font-size:11.5px;color:var(--muted);line-height:1.55}
+.method-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.method-row .field{flex:0 0 150px}
+.mres{font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;background:#eef1f0;color:var(--muted)}
+.mres.hit{background:#fbe6e3;color:var(--danger)}
+.mres.miss{background:#e3f3ec;color:var(--mintDeep)}
+.odk-row{display:flex;gap:10px;flex-wrap:wrap}
+.odk-row .field{flex:0 0 120px}
+
+/* ===== JUDGMENT PANEL ===== */
+.judge{position:sticky;bottom:0;z-index:40;margin:0 -16px -130px;padding:14px 16px calc(16px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-top:1.5px solid var(--line);box-shadow:0 -4px 18px rgba(26,58,74,.1)}
+.judge-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.j-counts{display:flex;gap:10px}
+.j-pill{display:flex;flex-direction:column;align-items:center;background:var(--mint);border-radius:11px;padding:8px 16px;min-width:88px}
+.j-pill.blue{background:var(--blueSoft)}
+.j-pill .n{font-size:24px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
+.j-pill .l{font-size:10.5px;color:var(--muted);margin-top:3px;font-weight:600}
+.j-verdict{flex:1;min-width:200px;font-size:14px;font-weight:700;padding:12px 16px;border-radius:11px;line-height:1.45}
+.j-verdict.neg{background:#f1f5f3;color:var(--muted)}
+.j-verdict.dx{background:#fdeee6;color:var(--accent2)}
+.j-verdict.dx.santei{background:#e8f5ee;color:var(--mintDeep);border:1.5px solid var(--mint2)}
+.j-verdict.hit{background:#eaf1f9;color:var(--blue2);border:1.5px solid #cfe0f0}
+.j-verdict small{display:block;font-weight:500;font-size:11.5px;margin-top:3px;opacity:.85}
+
+/* ===== billing candidate box ===== */
+.billbox{background:var(--blueSoft);border:1.5px solid #cfe0f0;border-radius:var(--radius-sm);padding:14px 15px}
+.billbox h3{font-size:14px;color:var(--blue2);margin-bottom:10px}
+.bill-line{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:7px 0;border-bottom:1px dashed #cfe0f0}
+.bill-line:last-child{border-bottom:none}
+.bill-line .pt{font-weight:800;color:var(--blue2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bill-line.total{margin-top:6px;border-top:2px solid var(--blue);border-bottom:none;font-size:15px;padding-top:10px}
+.bill-warn{background:#fdeede;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:9px 13px;font-size:12px;color:var(--accent2);margin-top:10px;font-weight:600;line-height:1.6}
+.bill-na{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* ===== 様式1 management plan (dev) ===== */
+.tags{display:flex;flex-wrap:wrap;gap:9px}
+.tag{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);border-radius:999px;padding:9px 15px;font-size:13.5px;font-weight:600;color:var(--muted);background:#fff;cursor:pointer;min-height:44px;transition:all .12s;user-select:none}
+.tag.on{background:var(--mint4);color:#fff;border-color:var(--mint4)}
+.tag .dot{width:9px;height:9px;border-radius:50%;background:var(--mint2)}
+.tag.on .dot{background:#fff}
+.tag.auto.on{background:var(--mint);color:var(--mintDeep);border-color:var(--mint2)}
+.subhead{font-size:13px;font-weight:700;color:var(--navy);margin:16px 0 9px;padding-left:10px;border-left:3px solid var(--mint4)}
+.subhead:first-child{margin-top:0}
+.inline-checks{display:flex;flex-wrap:wrap;gap:8px}
+.minichk{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13.5px;cursor:pointer;background:#fff;min-height:42px;user-select:none}
+.minichk.on{border-color:var(--mint4);background:var(--mint);font-weight:600;color:var(--ink)}
+.minichk .b{width:18px;height:18px;border:2px solid var(--mint2);border-radius:5px;flex:none;position:relative}
+.minichk.on .b{background:var(--mint4);border-color:var(--mint4)}
+.minichk.on .b::after{content:'';position:absolute;left:4px;top:1px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.note{background:var(--warm);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:11px 14px;font-size:12.5px;color:var(--text);line-height:1.7;margin-top:10px}
+
+/* ===== settings ===== */
+.set-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.set-field{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px}
+.set-field label{flex:1;font-size:12.5px;color:var(--ink);font-weight:600}
+.set-field input{width:90px;text-align:right;border:1.5px solid var(--line);border-radius:7px;padding:8px 10px;min-height:42px}
+.set-field input:focus{outline:none;border-color:var(--mint4)}
+.set-toggle{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px 14px;cursor:pointer;user-select:none}
+.set-toggle .b{width:20px;height:20px;border:2px solid var(--mint2);border-radius:5px;flex:none;position:relative}
+.set-toggle.on .b{background:var(--mint4);border-color:var(--mint4)}
+.set-toggle.on .b::after{content:'';position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.set-toggle label{font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer}
+
+/* ===== PRINT DOC ===== */
+.printdoc{display:none}
+
+/* ===== responsive ===== */
+@media (max-width:680px){
+  .grid.c2,.grid.c3,.grid.c4{grid-template-columns:1fr}
+  .grid.c2.keep,.grid.c4.keep{grid-template-columns:1fr 1fr}
+  .set-grid{grid-template-columns:1fr}
+  .topbar h1{font-size:14px}
+  .tb-btn{padding:9px 12px;font-size:12.5px}
+  .j-pill{min-width:72px;padding:7px 10px}
+  .j-pill .n{font-size:20px}
+}
+
+/* ===== PRINT ===== */
+@media print{
+  @page{size:A4;margin:12mm 12mm}
+  body{background:#fff;font-size:10.5pt;line-height:1.5;color:#000}
+  .topbar,.judge,.noprint,.modesw,.mode-age{display:none!important}
+  .wrap,.home-wrap{max-width:none;padding:0}
+  .screen-only,.view{display:none!important}
+  .printdoc{display:block!important}
+  .pd-sheet{page-break-after:always}
+  .pd-sheet:last-child{page-break-after:auto}
+}
+.pd-sheet{padding:0 0 10mm}
+.pd-title{text-align:center;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:10px}
+.pd-title h1{font-size:15pt;letter-spacing:.05em}
+.pd-title .sub{font-size:9pt;color:#333;margin-top:3px}
+.pd-meta{display:flex;justify-content:space-between;font-size:10pt;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.pd-row{border:1px solid #000;margin-bottom:6px}
+.pd-row .lbl{background:#eee;padding:4px 8px;font-weight:700;font-size:9.5pt;border-bottom:1px solid #000}
+.pd-row .val{padding:6px 8px;font-size:10pt;min-height:22px}
+.pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pd-chk{font-size:10pt;line-height:1.9}
+.pd-chk .c{display:inline-block;margin-right:14px;white-space:nowrap}
+.pd-foot{margin-top:14px;font-size:9pt;display:flex;justify-content:space-between;border-top:1px solid #000;padding-top:6px}
+.pd-note{font-size:8.5pt;color:#333;margin-top:8px;line-height:1.6}
+.pd-tbl{width:100%;border-collapse:collapse;margin-bottom:8px}
+.pd-tbl th,.pd-tbl td{border:1px solid #000;padding:4px 7px;font-size:9.5pt;text-align:left;vertical-align:top}
+.pd-tbl th{background:#eee;font-weight:700}
+.pd-tbl td.ctr{text-align:center;white-space:nowrap}
+.box-on::before{content:'\2611  '}
+.box-off::before{content:'\2610  '}
+</style>
+</head>
+<body>
+
+<div class="topbar noprint">
+  <button class="tb-btn" id="btnBack" style="display:none">‹ ホーム</button>
+  <h1 id="appTitle">口腔機能管理ツール<small id="appSub">院内業務用 / 外部送信なし・ローカル完結</small></h1>
+  <button class="tb-btn" id="btnNew" style="display:none">新規</button>
+  <button class="tb-btn" id="btnSettings">設定</button>
+  <button class="tb-btn print" id="btnPrint" style="display:none">印刷 / PDF</button>
+</div>
+
+<!-- ===================== HOME ===================== -->
+<div class="view active" id="view-home">
+  <div class="home-wrap">
+    <div class="home-lead">
+      <h2>口腔機能管理ツール</h2>
+      <p>使用する機能を選択してください</p>
+    </div>
+    <div class="launch">
+      <button class="launch-btn low" data-go="low">
+        <span class="bigico">低</span>
+        <span class="ltxt"><b>口腔機能低下症</b><span>成人・高齢者／検査7項目の該当判定・管理料の算定候補・結果シート</span></span>
+      </button>
+      <button class="launch-btn dev" data-go="dev">
+        <span class="bigico">発</span>
+        <span class="ltxt"><b>口腔機能発達不全症</b><span>小児／チェックシート・診断/算定判定・保護者用管理計画表（様式1）</span></span>
+      </button>
+      <button class="launch-btn ref" data-go="ref">
+        <span class="bigico">算</span>
+        <span class="ltxt"><b>算定リファレンス（スタッフ用）</b><span>各種算定点数・同時算定の組み合わせ早見（閲覧のみ／診断とは別の業務資料）</span></span>
+      </button>
+      <button class="launch-btn help" data-go="help">
+        <span class="bigico">？</span>
+        <span class="ltxt"><b>使用説明書（使い方）</b><span>起動方法・各機能の操作・印刷／PDF・iPadでの保存先</span></span>
+      </button>
+    </div>
+    <div class="home-note">
+      本ツールは判定の補助（該当項目数の集計・整理）を行うものです。最終的な診断は担当歯科医師が総合的に判断します。算定の可否・点数は施設の届出状況や最新の診療報酬に従い、必ずご確認ください。入力内容は端末内（localStorage）にのみ保存され、外部送信は行いません。
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 使用説明書 ===================== -->
+<div class="view" id="view-help">
+  <div class="wrap screen-only">
+
+    <div class="card" style="border-left:4px solid var(--mint4)">
+      <div class="card-h"><span class="ico">？</span><h2>使用説明書</h2></div>
+      <div class="note">本ツールは判定の補助（該当項目数の集計・整理）を行う院内業務用アプリです。最終的な診断は担当歯科医師が総合的に判断します。データは端末内（localStorage）のみに保存され、外部送信はありません。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">機</span><h2>4つの機能</h2></div>
+      <div class="help-doc">
+        <div class="ref-h">① 口腔機能低下症（成人・高齢者）</div>
+        検査7項目の数値を入力 → 該当／非該当を自動判定。実施項目のうち3項目以上該当で「判定基準を満たす」と表示（診断は医師）。前提（50歳以上 or 全身疾患による機能低下 ＋ 歯科疾患管理料）を満たすと「算定候補」に管理料1/2・検査点数が表示。「印刷 / PDF」で結果シートをA4出力。<br><span class="sub">※患者にお渡しする印刷物には算定点数は出ません（検査値・判定のみ）。点数は画面上の「算定候補」でスタッフが確認します。</span>
+        <div class="ref-h">② 口腔機能発達不全症（小児）</div>
+        離乳完了前／後を選択 → C項目チェックで診断・算定要件を自動判定（食べる＋話すで2項目以上・うち1つは必須の項目＝診断。2項目＝管理料2、3項目以上＝管理料1の区分を表示）。カウプ／ローレル指数も自動計算。「印刷 / PDF」でチェックシート（カルテ添付）＋管理計画表（保護者用・様式1）の2枚をA4出力。
+        <div class="ref-h">③ 算定リファレンス（スタッフ用）</div>
+        成人・小児の検査／管理点数、同時算定の組み合わせ、月次イメージを一覧で確認できる閲覧専用資料。診断・算定とは別の業務参考資料で、患者へ渡す資料ではありません。
+        <div class="ref-h">設定（マスタ管理）</div>
+        点数・該当基準値・施設基準フラグを編集（自動保存）。「マスタを初期値に戻す」で既定値に復帰。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">起</span><h2>起動方法</h2></div>
+      <div class="help-doc">
+        <b>Mac</b>：アプリ/index.html をダブルクリックで単体動作。<br>
+        <b>iPad（アイコン起動・オフライン）</b>：
+        <ol>
+          <li>アプリ/ フォルダを社内サーバー等に <b>https</b> で配置（iOSのオフライン動作にはhttps配信が必要）</li>
+          <li>SafariでURLを開く → 共有ボタン →「ホーム画面に追加」</li>
+          <li>追加されたアイコンから全画面・オフライン起動</li>
+        </ol>
+        <span class="sub">※ file:// で直接開いた場合は単体動作のみ（オフライン保存なし）。</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">印</span><h2>印刷 / PDF</h2></div>
+      <div class="help-doc">
+        画面右上「印刷 / PDF」で印刷ダイアログが開きます。保存ファイル名は「氏名_日付」で自動設定。次の患者は右上「新規」でリセットしてください（共用端末では患者ごとに必ず実施）。
+        <div class="ref-h">iPadで「PDFを保存」したときの保存先</div>
+        固定の自動保存フォルダはなく、保存時に場所を選びます。
+        <ol>
+          <li>「印刷 / PDF」を押す → 印刷プレビュー表示</li>
+          <li>プレビューを2本指で外側に広げる（ピンチアウト）→ PDFが全画面に</li>
+          <li>右上の共有ボタン（□に↑）をタップ</li>
+          <li>「ファイルに保存」→「このiPad内」（端末内・オフライン）または「iCloud Drive」（クラウド）を選択 → そのフォルダに保存。後で「ファイル」アプリで開けます。<br>※「ブックに保存」なら Apple Books へ。AirPrintプリンタを選べばその場で印刷も可。</li>
+        </ol>
+        <span class="sub">※保存先が分からなくなったら「ファイル」アプリの検索に氏名や日付を入力（ファイル名＝氏名_日付）。共用iPadでは患者情報PDFの保存先の扱いに注意し、院内ルールに従ってください。</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">注</span><h2>注意</h2></div>
+      <div class="help-doc">
+        ・最終的な診断は担当歯科医師が総合的に判断します（本アプリは判定の補助）。<br>
+        ・算定の可否・点数は施設の届出状況や最新の診療報酬に従い必ず確認してください。<br>
+        ・点数・基準・施設基準・同時算定の可否は、北足立歯科医師会 保険部および関東信越厚生局の最新通知で必ず確認のうえ運用してください。<br>
+        ・入力データは端末内（localStorage）にのみ保存され、外部送信はされません。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== 算定リファレンス（スタッフ用） ===================== -->
+<div class="view" id="view-ref">
+  <div class="wrap screen-only">
+
+    <div class="card" style="border-left:4px solid var(--accent)">
+      <div class="card-h"><span class="ico" style="background:linear-gradient(135deg,#e8773a,#c75f28)">算</span><h2>算定リファレンス（スタッフ閲覧用）</h2></div>
+      <div class="note">院内マニュアル（R8.6版）の要約です。<b>診断は歯科医師</b>、<b>算定の最終確認も人が行います</b>。点数・施設基準・同時算定の可否は北足立歯科医師会 保険部および関東信越厚生局の最新通知で必ず確認のうえ運用してください。患者へ渡す資料ではありません。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">低</span><h2>成人　口腔機能低下症</h2><span class="hint">機器検査の実施有無で区分</span></div>
+
+      <div class="ref-h">検査の算定</div>
+      <table class="reftbl">
+        <tr><th>検査項目</th><th>点数</th></tr>
+        <tr><td>舌圧検査</td><td class="pt">140点</td></tr>
+        <tr><td>咀嚼能力検査1（グルコセンサー）</td><td class="pt">140点</td></tr>
+        <tr><td>咬合圧検査1（デンタルプレスケールⅡ 等）</td><td class="pt">130点</td></tr>
+        <tr><td>口腔粘膜湿潤度検査</td><td class="pt">130点</td></tr>
+        <tr><td>口腔細菌定量検査2<span class="tag">＊</span></td><td class="pt">院内マスタ/最新通知で確認</td></tr>
+      </table>
+
+      <div class="ref-h">管理・指導の算定</div>
+      <table class="reftbl">
+        <tr><th>管理・指導項目</th><th>点数</th></tr>
+        <tr><td>口腔機能管理料1（機器を用いた検査を実施した患者）</td><td class="pt">90点</td></tr>
+        <tr><td>口腔機能管理料2（検査なしでも算定可）</td><td class="pt">50点</td></tr>
+        <tr><td>口腔管理体制強化加算<span class="tag">要届出</span></td><td class="pt">50点</td></tr>
+        <tr><td>歯科口腔リハビリテーション料3「2」（月2回）</td><td class="pt">50点</td></tr>
+        <tr><td>歯科衛生実地指導料 1／2</td><td class="pt">80／100点</td></tr>
+        <tr><td>口腔機能実地指導料<span class="tag">要届出・研修DH・文書提供</span></td><td class="pt">46点</td></tr>
+      </table>
+
+      <div class="ref-h">区分（50 → 90 ステップアップ）</div>
+      <div class="ref-combo">
+        ・機器なし3項目のみ（舌苔TCI/視診・舌口唇運動ディアドコ・嚥下RSST）で管理 → <b>口腔機能管理料2（50点）</b><br>
+        ・＋ 機器を用いた検査を1つ追加（3月に1回／舌圧・咀嚼能力1・咬合圧1・湿潤度・細菌定量2 のいずれか）→ <b>口腔機能管理料1（90点）</b>。検査点数130〜140点も別途算定可。<br>
+        ※区分は「機器を用いた検査を実施したか」で決まる（令和8年度改定）。
+      </div>
+
+      <div class="ref-h">検査の同時算定パターン（3月以内に1回・以下いずれか）</div>
+      <div class="ref-combo">
+        ・舌圧 ＋ 口腔粘膜湿潤度 ＋ 咀嚼能力1<br>
+        ・舌圧 ＋ 口腔粘膜湿潤度 ＋ 咬合圧1<br>
+        <span class="ng">✕ 咬合圧検査1 と 咀嚼能力検査1 の同時算定は不可</span>（どちらか一方を3月に1回）<br>
+        ※有床義歯新製時に有床義歯咀嚼機能検査を実施・算定した場合、その結果を低下症の検査結果とみなせる。
+      </div>
+
+      <div class="ref-h">管理の前提</div>
+      <div class="ref-combo">
+        ・口腔機能管理料は<b>歯科疾患管理料（または歯科特定疾患療養管理料）を算定する場合</b>に算定。<br>
+        ・歯リハ3 と 口腔機能実地指導料 は、指導内容が重複しない場合のみ同時算定可。
+      </div>
+
+      <div class="ref-h">月次イメージ（管理料1 ＋ 歯リハ3 月2回の例）</div>
+      <div class="ref-month">
+        <table class="reftbl">
+          <tr><th>月</th><th>構成</th><th>合計</th></tr>
+          <tr><td>初回検査月</td><td>検査一式＋歯管＋管理料1＋口管強＊＋歯リハ3×2＋衛生実地指導1＋口腔機能実地指導＊</td><td class="pt">931点<br>(口管強なし921点)</td></tr>
+          <tr><td>1〜2か月後</td><td>歯管＋管理料1＋口管強＊＋歯リハ3×2＋衛生実地指導1＋口腔機能実地指導＊</td><td class="pt">456点</td></tr>
+          <tr><td>3か月後（再検査）</td><td>初回検査月と同構成</td><td class="pt">931点<br>(921点)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico" style="background:linear-gradient(135deg,#2d8f70,#1f6b53)">発</span><h2>小児　口腔機能発達不全症（18歳未満）</h2><span class="hint">該当項目数で区分</span></div>
+
+      <div class="ref-h">検査の算定</div>
+      <table class="reftbl">
+        <tr><th>検査項目</th><th>点数</th></tr>
+        <tr><td>舌圧検査（JMS舌圧測定器／年齢別cut-off）</td><td class="pt">140点</td></tr>
+        <tr><td>小児口唇閉鎖力検査（年齢・性別の−1SD未満で該当）</td><td class="pt">100点</td></tr>
+      </table>
+
+      <div class="ref-h">管理・指導の算定</div>
+      <table class="reftbl">
+        <tr><th>管理・指導項目</th><th>点数</th></tr>
+        <tr><td>小児口腔機能管理料 1／2</td><td class="pt">90／50点</td></tr>
+        <tr><td>口腔管理体制強化加算<span class="tag">要届出</span></td><td class="pt">50点</td></tr>
+        <tr><td>歯科口腔リハビリテーション料3「1」（発達不全・18歳未満／月2回）</td><td class="pt">50点</td></tr>
+        <tr><td>歯科衛生実地指導料 1／2</td><td class="pt">80／100点</td></tr>
+        <tr><td>口腔機能実地指導料<span class="tag">要届出・研修DH・文書提供</span></td><td class="pt">46点</td></tr>
+      </table>
+
+      <div class="ref-h">区分（チェックリスト該当項目数）</div>
+      <div class="ref-combo">
+        ・該当 <b>2個</b> ＝ 診断の最小ライン → <b>小児口腔機能管理料2（50点）</b><br>
+        ・該当 <b>3個以上</b> → <b>小児口腔機能管理料1（90点）</b>（毎月算定・歯科疾患管理料と併せて）
+      </div>
+
+      <div class="ref-h">注意</div>
+      <div class="ref-combo">
+        <span class="ng">⚠ 成人と区分の決まり方が違う</span>：小児＝「チェックリスト該当項目数（2個=50点／3個以上=90点）」、成人＝「機器を用いた検査の実施有無」。混同しない。<br>
+        ・歯リハ3「1」と 口腔機能実地指導料 は指導内容が重複しない場合のみ同時算定可。<br>
+        ・小児口腔機能管理料は歯科疾患管理料と併せて算定。
+      </div>
+
+      <div class="ref-h">月次イメージ（小児管理料1 ＋ 歯リハ3 月2回の例）</div>
+      <div class="ref-month">
+        <table class="reftbl">
+          <tr><th>月</th><th>構成</th><th>合計</th></tr>
+          <tr><td>初回検査月</td><td>舌圧＋小児口唇閉鎖力＋歯管＋小児管理料1＋口管強＊＋歯リハ3×2＋衛生実地指導＋口腔機能実地指導＊</td><td class="pt">696点</td></tr>
+          <tr><td>1〜2か月後</td><td>歯管＋小児管理料1＋口管強＊＋歯リハ3×2＋衛生実地指導＋口腔機能実地指導＊</td><td class="pt">456点</td></tr>
+          <tr><td>3か月後（再検査）</td><td>初回検査月と同構成</td><td class="pt">696点</td></tr>
+        </table>
+      </div>
+
+      <div class="ref-disc">＊「要届出」（口腔管理体制強化加算・口腔機能実地指導料）は施設基準の届出が前提。点数は自院の届出状況により変動します。<br>出典：日本歯科医学会「口腔機能低下症／発達不全症に関する基本的な考え方（令和6年）」、日本老年歯科医学会、株式会社ジーシー 口腔機能情報サイト（令和8年改定対応）。点数・施設基準・同時算定の可否は北足立歯科医師会 保険部および関東信越厚生局の最新通知で必ず確認のこと。</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== 低下症 ===================== -->
+<div class="view" id="view-low">
+  <div class="wrap screen-only">
+
+    <div class="card">
+      <div class="card-h"><span class="ico">基</span><h2>基本情報</h2><span class="hint" id="lowSaveStat">自動保存</span></div>
+      <div class="grid c3">
+        <div class="field"><label>お名前（イニシャル推奨）</label><input id="lf_name" placeholder="例：H.T."></div>
+        <div class="field"><label>カルテ No.</label><input id="lf_no" placeholder="No." inputmode="numeric"></div>
+        <div class="field"><label>検査日</label><input id="lf_date" type="date"></div>
+      </div>
+      <div class="grid c3" style="margin-top:14px">
+        <div class="field"><label>生年月日</label><input id="lf_birth" type="date"></div>
+        <div class="field"><label>年齢</label><div class="unit"><input id="lf_age" placeholder="自動計算" readonly><span class="u">歳</span></div></div>
+        <div class="field"><label>性別</label>
+          <select id="lf_sex"><option value="">—</option><option>男</option><option>女</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">検</span><h2>検査7項目</h2><span class="hint">数値を入力すると自動判定</span></div>
+      <div id="examlist"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">算</span><h2>算定の前提</h2></div>
+      <div class="inline-checks" style="gap:10px">
+        <span class="minichk" id="lflag_shikkan"><span class="b"></span>歯科疾患管理料を算定している</span>
+        <span class="minichk" id="lflag_whole"><span class="b"></span>全身的な疾患等により口腔機能低下を認める（50歳未満でも対象）</span>
+      </div>
+      <div class="note" id="lowTargetNote"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">候</span><h2>算定候補</h2><span class="hint">点数・基準は「設定」で変更可</span></div>
+      <div id="billbox"></div>
+    </div>
+
+    <div class="judge">
+      <div class="judge-inner">
+        <div class="j-counts">
+          <div class="j-pill blue"><span class="n" id="lowDone">0</span><span class="l">実施項目</span></div>
+          <div class="j-pill blue"><span class="n" id="lowHit">0</span><span class="l">該当項目</span></div>
+        </div>
+        <div class="j-verdict neg" id="lowVerdict">検査値を入力してください</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 発達不全症 ===================== -->
+<div class="view" id="view-dev">
+  <div class="wrap screen-only">
+
+    <div class="card">
+      <div class="card-h"><span class="ico">基</span><h2>基本情報</h2><span class="hint" id="saveStat">自動保存</span></div>
+      <div class="grid c3">
+        <div class="field"><label>お名前（イニシャル推奨）</label><input id="f_name" placeholder="例：H.T."></div>
+        <div class="field"><label>カルテ No.</label><input id="f_no" placeholder="No." inputmode="numeric"></div>
+        <div class="field"><label>記入日</label><input id="f_date" type="date"></div>
+      </div>
+      <div class="grid c3" style="margin-top:14px">
+        <div class="field"><label>生年月日</label><input id="f_birth" type="date"></div>
+        <div class="field"><label>年齢</label><div class="unit"><input id="f_age" placeholder="自動計算" readonly><span class="u">歳</span></div></div>
+        <div class="field"><label>性別</label>
+          <select id="f_sex"><option value="">—</option><option>男</option><option>女</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">区</span><h2>診断区分</h2></div>
+      <div class="modesw">
+        <button data-mode="pre" id="modePre">離乳完了前</button>
+        <button data-mode="post" id="modePost" class="on">離乳完了後</button>
+      </div>
+      <div class="mode-age" id="modeHint">※おおむね18か月（離乳完了）を目安に切り替えてください。早産児は修正月齢で評価します。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">C</span><h2>チェックシート</h2><span class="hint">該当する項目をタップ</span></div>
+      <div id="checklist"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ico">管</span><h2>管理計画表（保護者用・文書様式1）</h2></div>
+
+      <div class="subhead">基礎疾患・服薬</div>
+      <div class="grid c2">
+        <div class="field"><label>基礎疾患（アレルギー・呼吸器・耳鼻科・心臓・血液・肝腎 など）</label><textarea id="m_disease" placeholder="例：アレルギー（卵）"></textarea></div>
+        <div class="field"><label>服薬</label><textarea id="m_med" placeholder="無 / 有（薬剤名）"></textarea></div>
+      </div>
+
+      <div class="subhead">生活習慣</div>
+      <div class="field"><label>歯みがき</label>
+        <div class="inline-checks" data-checkgroup="m_brush">
+          <span class="minichk" data-v="起床後"><span class="b"></span>起床後</span>
+          <span class="minichk" data-v="朝食後"><span class="b"></span>朝食後</span>
+          <span class="minichk" data-v="昼食後"><span class="b"></span>昼食後</span>
+          <span class="minichk" data-v="夕食後"><span class="b"></span>夕食後</span>
+          <span class="minichk" data-v="就寝前"><span class="b"></span>就寝前</span>
+          <span class="minichk" data-v="フロス使用"><span class="b"></span>フロス使用</span>
+          <span class="minichk" data-v="電動歯ブラシ"><span class="b"></span>電動歯ブラシ</span>
+        </div>
+      </div>
+      <div class="grid c2" style="margin-top:12px">
+        <div class="field"><label>間食</label>
+          <select id="m_snack"><option value="">—</option><option>不規則</option><option>規則正しい</option><option>あまりしない</option></select>
+        </div>
+        <div class="field"><label>習慣的飲料物</label><input id="m_drink" placeholder="例：お茶 / 水"></div>
+      </div>
+
+      <div class="subhead">口腔内の状況</div>
+      <div class="grid c2 keep">
+        <div class="field"><label>むし歯</label>
+          <select id="m_caries"><option value="">—</option><option>なし</option><option>初期あり</option><option>あり</option></select>
+        </div>
+        <div class="field"><label>口唇閉鎖力</label><div class="unit"><input id="m_lip" inputmode="decimal" placeholder="数値"><span class="u">N</span></div></div>
+        <div class="field"><label>歯肉：プラーク・歯石の付着</label>
+          <select id="m_plaque"><option value="">—</option><option>なし</option><option>少しあり</option><option>あり</option></select>
+        </div>
+        <div class="field"><label>歯肉：歯肉の炎症</label>
+          <select id="m_gingiva"><option value="">—</option><option>なし</option><option>少しあり</option><option>あり</option></select>
+        </div>
+      </div>
+
+      <div class="subhead">小児口腔機能の問題 <span style="font-size:11px;font-weight:500;color:var(--muted)">（チェックシートから自動反映・タップで調整可）</span></div>
+      <div class="tags" id="funcTags"></div>
+      <div class="field" style="margin-top:12px"><label>習癖（くせ）の内容</label>
+        <div class="inline-checks" data-checkgroup="m_habit">
+          <span class="minichk" data-v="指しゃぶり"><span class="b"></span>指しゃぶり</span>
+          <span class="minichk" data-v="舌の突出"><span class="b"></span>舌の突出</span>
+          <span class="minichk" data-v="おしゃぶり使用"><span class="b"></span>おしゃぶり使用</span>
+          <span class="minichk" data-v="歯ぎしり"><span class="b"></span>歯ぎしり</span>
+          <span class="minichk" data-v="口呼吸"><span class="b"></span>口呼吸</span>
+        </div>
+      </div>
+
+      <div class="subhead">改善目標</div>
+      <div class="inline-checks" data-checkgroup="m_goal">
+        <span class="minichk" data-v="歯みがきの習慣"><span class="b"></span>歯みがきの習慣</span>
+        <span class="minichk" data-v="歯ブラシ・フロスの使用"><span class="b"></span>歯ブラシ・フロスの使用</span>
+        <span class="minichk" data-v="飲料物の習慣"><span class="b"></span>飲料物の習慣</span>
+        <span class="minichk" data-v="間食の習慣"><span class="b"></span>間食の習慣</span>
+        <span class="minichk" data-v="よくかむ習慣"><span class="b"></span>よくかむ習慣</span>
+        <span class="minichk" data-v="口腔機能の改善・獲得"><span class="b"></span>口腔機能の改善・獲得</span>
+      </div>
+
+      <div class="subhead">治療の予定</div>
+      <div class="inline-checks" data-checkgroup="m_plan">
+        <span class="minichk" data-v="ブラッシング指導"><span class="b"></span>ブラッシング指導</span>
+        <span class="minichk" data-v="フッ化物塗布"><span class="b"></span>フッ化物塗布</span>
+        <span class="minichk" data-v="シーラント"><span class="b"></span>シーラント</span>
+        <span class="minichk" data-v="むし歯治療"><span class="b"></span>むし歯治療</span>
+        <span class="minichk" data-v="歯肉炎・歯周炎の治療"><span class="b"></span>歯肉炎・歯周炎の治療</span>
+        <span class="minichk" data-v="口腔機能管理"><span class="b"></span>口腔機能管理</span>
+      </div>
+
+      <div class="subhead">特記事項・備考</div>
+      <div class="field"><textarea id="m_memo" placeholder="保護者への説明内容・観察事項など"></textarea></div>
+
+      <div class="subhead">記入者</div>
+      <div class="grid c2">
+        <div class="field"><label>医療機関名</label><input id="m_clinic" placeholder="医院名"></div>
+        <div class="field"><label>担当歯科医師</label><input id="m_doctor" placeholder="氏名"></div>
+      </div>
+    </div>
+
+    <div class="judge">
+      <div class="judge-inner">
+        <div class="j-counts">
+          <div class="j-pill"><span class="n" id="cntDx">0</span><span class="l">食べる+話す</span></div>
+          <div class="j-pill"><span class="n" id="cntAll">0</span><span class="l">全体（その他含む）</span></div>
+        </div>
+        <div class="j-verdict neg" id="verdict">該当項目を入力してください</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 設定 ===================== -->
+<div class="view" id="view-settings">
+  <div class="wrap">
+    <div class="card">
+      <div class="card-h"><span class="ico">点</span><h2>点数マスタ（口腔機能低下症）</h2></div>
+      <div class="set-grid" id="setPoints"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="ico">基</span><h2>該当基準値マスタ</h2></div>
+      <div class="set-grid" id="setThresholds"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="ico">届</span><h2>施設基準フラグ</h2></div>
+      <div id="setFacility"></div>
+      <div class="note">施設基準の届出がない項目は算定候補から除外されます。点数・基準値は最新の診療報酬および施設の届出状況に合わせて調整してください。変更は自動保存されます。</div>
+    </div>
+    <div class="card">
+      <button class="tb-btn" id="btnResetMaster" style="background:var(--danger);width:100%;justify-content:center;min-height:50px">マスタを初期値に戻す</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PRINT DOCUMENT ===================== -->
+<div class="printdoc" id="printdoc"></div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   共通：マスタ（点数・基準値・施設基準）／localStorage
+   ========================================================= */
+const MASTER_STORE='oral_master_v1';
+const MASTER_DEFAULT={
+  pt:{kanri1:90,kanri2:50,zetsuatsu:140,soshaku1:140,kogoatsu1:130,shijun:130,saikin2:50,haireha3_2:50,jitchi:46},
+  th:{age:50,tci:50,shijun:27.0,saliva:2,teeth:20,kogoatsu_filter:350,kogoatsu_nofilter:500,oramo2:375,odk:6,zetsuatsu:30,soshaku:100,rsst:3,eat10:3},
+  fac:{jitchi:false}
+};
+const PT_LABEL={kanri1:'口腔機能管理料1（点）',kanri2:'口腔機能管理料2（点）',zetsuatsu:'舌圧検査（点）',soshaku1:'咀嚼能力検査1（点）',kogoatsu1:'咬合圧検査1（点）',shijun:'口腔粘膜湿潤度検査（点）',saikin2:'口腔細菌定量検査2（点）',haireha3_2:'歯科口腔リハビリ料3「2」（点）',jitchi:'口腔機能管理に係る指導料（点）'};
+const TH_LABEL={age:'算定対象年齢（歳以上）',tci:'TCI該当（%以上）',shijun:'口腔粘膜湿潤度 該当（未満）',saliva:'唾液量 該当（g以下/2分）',teeth:'残存歯数 該当（本未満）',kogoatsu_filter:'咬合圧 フィルタ有 該当（N未満）',kogoatsu_nofilter:'咬合圧 フィルタ無 該当（N未満）',oramo2:'咬合圧 Oramo2 該当（N未満）',odk:'ODK 該当（回/秒未満）',zetsuatsu:'舌圧 該当（kPa未満）',soshaku:'咀嚼能力 該当（mg/dL未満）',rsst:'RSST 該当（回未満）',eat10:'EAT-10 該当（点以上）'};
+const FAC_LABEL={jitchi:'口腔機能管理に係る指導料の施設基準あり'};
+
+function deepMerge(base,ov){const r=JSON.parse(JSON.stringify(base));if(ov)for(const k in r){if(typeof r[k]==='object')Object.assign(r[k],ov[k]||{});else if(ov[k]!==undefined)r[k]=ov[k];}return r;}
+let MASTER=loadMaster();
+function loadMaster(){try{const s=JSON.parse(localStorage.getItem(MASTER_STORE));return deepMerge(MASTER_DEFAULT,s);}catch(e){return deepMerge(MASTER_DEFAULT,null);}}
+function saveMaster(){localStorage.setItem(MASTER_STORE,JSON.stringify(MASTER));}
+
+const CHECK=()=> '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+/* =========================================================
+   ルーター（ビュー切替・トップバー制御）
+   ========================================================= */
+let currentView='home';
+let prevView='home';
+const TITLES={
+  home:['口腔機能管理ツール','院内業務用 / 外部送信なし・ローカル完結'],
+  low:['口腔機能低下症','成人・高齢者 / 検査7項目・算定候補'],
+  dev:['口腔機能発達不全症','小児 / 日本小児歯科学会監修フォーマット準拠'],
+  ref:['算定リファレンス','スタッフ閲覧用 / 各種算定点数・同時算定の組み合わせ'],
+  help:['使用説明書','起動方法・各機能の操作・印刷／PDF・iPadでの保存先'],
+  settings:['設定（マスタ管理）','点数・基準値・施設基準の編集']
+};
+function showView(name){
+  prevView=(name==='settings')?currentView:name;
+  currentView=name;
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name));
+  const t=TITLES[name];
+  document.getElementById('appTitle').childNodes[0].nodeValue=t[0];
+  document.getElementById('appSub').textContent=t[1];
+  const onModule=(name==='low'||name==='dev');
+  document.getElementById('btnBack').style.display=(name==='home')?'none':'inline-flex';
+  document.getElementById('btnNew').style.display=onModule?'inline-flex':'none';
+  document.getElementById('btnPrint').style.display=onModule?'inline-flex':'none';
+  document.getElementById('btnSettings').style.display=(name==='home'||onModule)?'inline-flex':'none';
+  window.scrollTo(0,0);
+}
+
+/* =========================================================
+   口腔機能発達不全症モジュール（小児）
+   ========================================================= */
+const DEV=(function(){
+const ITEMS={
+  pre:[
+    {fn:'食べる',cls:'哺乳',list:[
+      {c:'C1',t:'先天性歯がある',grp:'eat',k:'その他'},
+      {c:'C2',t:'口唇・歯槽の形態に異常がある',grp:'eat',k:'その他'},
+      {c:'C3',t:'舌小帯に異常がある',grp:'eat',k:'その他'},
+      {c:'C4',t:'乳首をしっかり口に含むことができない',grp:'eat',k:'食行動'},
+      {c:'C5',t:'授乳時間が長すぎる、短すぎる',grp:'eat',k:'食行動'},
+      {c:'C6',t:'哺乳量・授乳回数が多すぎたりムラがある等',grp:'eat',k:'食行動'},
+    ]},
+    {fn:'食べる',cls:'離乳',list:[
+      {c:'C7',t:'開始しているが首のすわりが確認できない',grp:'eat',k:'食行動'},
+      {c:'C8',t:'スプーンを舌で押し出す状態がみられる',grp:'eat',k:'嚥下機能'},
+      {c:'C9',t:'離乳が進まない',grp:'eat',k:'食行動'},
+    ]},
+    {fn:'話す',cls:'構音機能',list:[
+      {c:'C10',t:'口唇の閉鎖不全がある（安静時に口唇閉鎖を認めない）',grp:'talk',k:'構音機能'},
+    ]},
+    {fn:'その他',cls:'栄養',list:[
+      {c:'C11',t:'やせ、または肥満である（カウプ指数で評価）',grp:'other',k:'栄養',idx:'kaup'},
+    ]},
+    {fn:'その他',cls:'その他',list:[
+      {c:'C12',t:'口腔周囲に過敏がある',grp:'other',k:'習癖'},
+      {c:'C13',t:'上記以外の問題点',grp:'other',k:'その他',memo:true},
+    ]},
+  ],
+  post:[
+    {fn:'食べる',cls:'咀嚼機能',list:[
+      {c:'C1',t:'歯の萌出に遅れがある',grp:'eat',k:'咀嚼機能'},
+      {c:'C2',t:'機能的因子による歯列・咬合の異常がある',grp:'eat',k:'咀嚼機能'},
+      {c:'C3',t:'咀嚼に影響するう蝕がある',grp:'eat',k:'咀嚼機能'},
+      {c:'C4',t:'強く噛みしめられない',grp:'eat',k:'咀嚼機能'},
+      {c:'C5',t:'咀嚼時間が長すぎる、短すぎる',grp:'eat',k:'咀嚼機能'},
+      {c:'C6',t:'偏咀嚼がある',grp:'eat',k:'咀嚼機能'},
+    ]},
+    {fn:'食べる',cls:'嚥下機能',list:[
+      {c:'C7',t:'舌の突出（乳児嚥下の残存）がみられる',grp:'eat',k:'嚥下機能'},
+    ]},
+    {fn:'食べる',cls:'食行動',list:[
+      {c:'C8',t:'哺乳量・食べる量、回数が多すぎたり少なすぎたりムラがある等',grp:'eat',k:'食行動'},
+    ]},
+    {fn:'話す',cls:'構音機能',list:[
+      {c:'C9',t:'構音に障害がある（音の置換、省略、歪みなどがある）',grp:'talk',k:'構音機能'},
+      {c:'C10',t:'口唇閉鎖不全がある（安静時に口唇閉鎖を認めない）',grp:'talk',k:'構音機能'},
+      {c:'C11',t:'口腔習癖がある',grp:'talk',k:'習癖'},
+      {c:'C12',t:'舌小帯に異常がある',grp:'talk',k:'構音機能'},
+    ]},
+    {fn:'その他',cls:'栄養（体格）',list:[
+      {c:'C13',t:'やせ、または肥満である（カウプ指数・ローレル指数で評価）',grp:'other',k:'栄養',idx:'both'},
+    ]},
+    {fn:'その他',cls:'その他',list:[
+      {c:'C14',t:'口呼吸がある',grp:'other',k:'習癖'},
+      {c:'C15',t:'口蓋扁桃などに肥大がある',grp:'other',k:'その他'},
+      {c:'C16',t:'睡眠時のいびきがある',grp:'other',k:'その他'},
+      {c:'C17',t:'舌を口蓋に押しつける力が弱い（低舌圧である）',grp:'other',k:'その他'},
+      {c:'C18',t:'上記以外の問題点',grp:'other',k:'その他',memo:true},
+    ]},
+  ]
+};
+const FUNC_TAGS=['咀嚼機能','嚥下機能','食行動','構音機能','栄養','習癖','その他'];
+const GOAL_ALL=['歯みがきの習慣','歯ブラシ・フロスの使用','飲料物の習慣','間食の習慣','よくかむ習慣','口腔機能の改善・獲得'];
+const PLAN_ALL=['ブラッシング指導','フッ化物塗布','シーラント','むし歯治療','歯肉炎・歯周炎の治療','口腔機能管理'];
+const STORE='oralfunc_v1';
+let mode='post';
+let state=loadState();
+const K=c=>mode+':'+c;
+function blankState(){return {mode:'post',checks:{},extra:{},fields:{},groups:{},funcOverride:{}};}
+function loadState(){try{const s=JSON.parse(localStorage.getItem(STORE));if(s&&s.extra&&s.extra['post:C17_memo']!==undefined&&s.checks&&!s.checks['post:C18']){s.checks['post:C18']=s.checks['post:C17'];delete s.checks['post:C17'];s.extra['post:C18_memo']=s.extra['post:C17_memo'];delete s.extra['post:C17_memo'];}return s&&s.mode?s:blankState();}catch(e){return blankState();}}
+function save(){state.mode=mode;localStorage.setItem(STORE,JSON.stringify(state));flash();}
+let flashT;
+function flash(){const el=document.getElementById('saveStat');if(!el)return;el.textContent='保存しました';el.style.color='var(--mint4)';clearTimeout(flashT);flashT=setTimeout(()=>{el.textContent='自動保存';el.style.color='';},1200);}
+
+function renderChecklist(){
+  const root=document.getElementById('checklist');root.innerHTML='';
+  ITEMS[mode].forEach(grp=>{
+    const g=document.createElement('div');g.className='catgrp';
+    g.innerHTML='<span class="cat-label">'+grp.cls+' <span class="fn">／ '+grp.fn+'</span></span>';
+    grp.list.forEach(it=>{
+      const on=!!state.checks[K(it.c)];
+      const row=document.createElement('div');row.className='citem'+(on?' on':'');row.dataset.c=it.c;
+      row.innerHTML='<span class="box">'+CHECK()+'</span><span class="txt"><span class="code">'+it.c+'</span>'+it.t+'</span>';
+      row.addEventListener('click',()=>toggle(it.c));
+      g.appendChild(row);
+      if(it.idx){
+        const ex=document.createElement('div');ex.className='citem-extra';ex.id='ex_'+it.c;ex.style.display=on?'grid':'none';
+        ex.innerHTML=indexHTML(it.idx);g.appendChild(ex);bindIndex(ex,it.idx);
+      }
+      if(it.memo){
+        const ex=document.createElement('div');ex.className='citem-extra';ex.id='ex_'+it.c;ex.style.display=on?'grid':'none';
+        ex.innerHTML='<div class="field"><textarea data-extra="'+it.c+'_memo" placeholder="内容を記入"></textarea></div>';
+        const ta=ex.querySelector('textarea');const mk=K(it.c)+'_memo';ta.value=state.extra[mk]||'';
+        ta.addEventListener('input',()=>{state.extra[mk]=ta.value;save();});g.appendChild(ex);
+      }
+    });
+    root.appendChild(g);
+  });
+}
+function indexHTML(kind){
+  return '<div class="grid c4 keep">'
+    +'<div class="field"><label>現体重</label><div class="unit"><input data-extra="cw" inputmode="decimal"><span class="u">kg</span></div></div>'
+    +'<div class="field"><label>現身長</label><div class="unit"><input data-extra="ch" inputmode="decimal"><span class="u">cm</span></div></div>'
+    +'<div class="field"><label>出生時体重</label><div class="unit"><input data-extra="bw" inputmode="decimal"><span class="u">g</span></div></div>'
+    +'<div class="field"><label>出生時身長</label><div class="unit"><input data-extra="bh" inputmode="decimal"><span class="u">cm</span></div></div>'
+    +'</div>'
+    +'<div class="idx-box"><span class="res">カウプ指数：<b id="idx_kaup">—</b> <span class="idx-j" id="idx_kaup_j">—</span></span>'
+    +(kind==='both'?'<span class="res">ローレル指数：<b id="idx_rohrer">—</b> <span class="idx-j" id="idx_rohrer_j">—</span></span>':'')
+    +'<span style="font-size:11.5px;color:var(--muted)">カウプ＝体重(g)÷身長(cm)²×10（乳幼児）／ローレル＝体重(kg)÷身長(m)³×10（学童）</span></div>';
+}
+function bindIndex(ex,kind){
+  ex.querySelectorAll('input[data-extra]').forEach(inp=>{
+    const key=inp.dataset.extra;inp.value=state.extra[key]||'';
+    inp.addEventListener('input',()=>{state.extra[key]=inp.value;calcIndex(kind);save();});
+  });
+  calcIndex(kind);
+}
+function classifyKaup(v){if(v<13)return['やせすぎ','danger'];if(v<15)return['やせぎみ','warn'];if(v<18)return['標準','ok'];if(v<20)return['太りぎみ','warn'];return['太りすぎ','danger'];}
+function classifyRohrer(v){if(v<100)return['やせすぎ','danger'];if(v<115)return['やせぎみ','warn'];if(v<145)return['標準','ok'];if(v<160)return['太りぎみ','warn'];return['太りすぎ','danger'];}
+function kaupVal(){const cw=parseFloat(state.extra.cw),ch=parseFloat(state.extra.ch);return(cw>0&&ch>0)?(cw*1000)/(ch*ch)*10:null;}
+function rohrerVal(){const cw=parseFloat(state.extra.cw),ch=parseFloat(state.extra.ch);if(!(cw>0&&ch>0))return null;const m=ch/100;return cw/(m*m*m)*10;}
+function setJ(el,res){if(!el)return;el.className='idx-j';if(res){el.textContent=res[0];el.classList.add(res[1]);}else{el.textContent='—';}}
+function calcIndex(kind){
+  const kEl=document.getElementById('idx_kaup');const rEl=document.getElementById('idx_rohrer');
+  if(kEl){const v=kaupVal();kEl.textContent=v!=null?v.toFixed(1):'—';setJ(document.getElementById('idx_kaup_j'),v!=null?classifyKaup(v):null);}
+  if(rEl){const v=rohrerVal();rEl.textContent=v!=null?v.toFixed(1):'—';setJ(document.getElementById('idx_rohrer_j'),v!=null?classifyRohrer(v):null);}
+}
+function toggle(c){
+  const k=K(c);state.checks[k]=!state.checks[k];
+  const row=document.querySelector('#view-dev .citem[data-c="'+c+'"]');row.classList.toggle('on',state.checks[k]);
+  const ex=document.getElementById('ex_'+c);if(ex)ex.style.display=state.checks[k]?'grid':'none';
+  judge();renderFuncTags();save();
+}
+function judge(){
+  let dx=0,all=0,must=0;
+  ITEMS[mode].forEach(g=>g.list.forEach(it=>{if(state.checks[K(it.c)]){all++;if(it.grp==='eat'||it.grp==='talk'){dx++;if(parseInt(it.c.slice(1),10)<=(mode==='pre'?9:6))must++;}}}));
+  document.getElementById('cntDx').textContent=dx;document.getElementById('cntAll').textContent=all;
+  const v=document.getElementById('verdict');v.className='j-verdict';
+  const mustLbl=mode==='pre'?'C1〜C9（哺乳・離乳）':'C1〜C6（咀嚼）';
+  if(dx>=2&&must>=1){
+    v.classList.add('dx');v.classList.add('santei');
+    v.innerHTML='【口腔機能発達不全症】の診断基準に該当（食べる＋話す '+dx+'項目）'
+      +'<small>評価項目 '+dx+'項目 → 小児口腔機能管理料'+(dx>=3?'1（3項目以上）':'2（2項目）')+'の区分。「その他」は項目数に含めていません</small>';
+  }else if(dx>=2){
+    v.classList.add('neg');
+    v.innerHTML='診断基準に未到達：必須の項目（'+mustLbl+'）が含まれていません<small>「食べる」「話す」で2項目以上、うち1つは'+mustLbl+'が必要です</small>';
+  }else{
+    v.classList.add('neg');
+    v.innerHTML='診断基準（食べる＋話す 2項目以上）に未到達（現在'+dx+'項目）<small>2項目以上、うち1つは'+mustLbl+'で口腔機能発達不全症と診断</small>';
+  }
+}
+function renderFuncTags(){
+  const auto=new Set();ITEMS[mode].forEach(g=>g.list.forEach(it=>{if(state.checks[K(it.c)])auto.add(it.k);}));
+  const root=document.getElementById('funcTags');root.innerHTML='';
+  FUNC_TAGS.forEach(t=>{
+    const isAuto=auto.has(t);const override=state.funcOverride[t];const on=override!==undefined?override:isAuto;
+    const el=document.createElement('span');el.className='tag'+(on?' on':'')+(on&&isAuto&&override===undefined?' auto':'');
+    el.innerHTML='<span class="dot"></span>'+t;
+    el.addEventListener('click',()=>{const cur=state.funcOverride[t]!==undefined?state.funcOverride[t]:isAuto;state.funcOverride[t]=!cur;renderFuncTags();save();});
+    root.appendChild(el);
+  });
+}
+function activeFuncTags(){const auto=new Set();ITEMS[mode].forEach(g=>g.list.forEach(it=>{if(state.checks[K(it.c)])auto.add(it.k);}));return FUNC_TAGS.filter(t=>{const o=state.funcOverride[t];return o!==undefined?o:auto.has(t);});}
+function bindFields(){
+  document.querySelectorAll('#view-dev [id^="f_"],#view-dev [id^="m_"]').forEach(el=>{
+    if(el.id==='f_age')return;
+    el.value=state.fields[el.id]||'';
+    const ev=(el.tagName==='SELECT')?'change':'input';
+    el.addEventListener(ev,()=>{state.fields[el.id]=el.value;if(el.id==='f_birth'||el.id==='f_date')calcAge();save();});
+  });
+  document.querySelectorAll('#view-dev [data-checkgroup]').forEach(grp=>{
+    const key=grp.dataset.checkgroup;state.groups[key]=state.groups[key]||[];
+    grp.querySelectorAll('.minichk').forEach(ch=>{
+      const v=ch.dataset.v;if(state.groups[key].includes(v))ch.classList.add('on');
+      ch.addEventListener('click',()=>{const arr=state.groups[key];const i=arr.indexOf(v);if(i>=0)arr.splice(i,1);else arr.push(v);ch.classList.toggle('on');save();});
+    });
+  });
+}
+function calcAge(){
+  const b=state.fields.f_birth,d=state.fields.f_date||new Date().toISOString().slice(0,10);
+  const out=document.getElementById('f_age');if(!out)return;
+  if(!b){out.value='';return;}
+  const bd=new Date(b),dd=new Date(d);let age=dd.getFullYear()-bd.getFullYear();
+  const m=dd.getMonth()-bd.getMonth();if(m<0||(m===0&&dd.getDate()<bd.getDate()))age--;
+  if(age<2){let months=(dd.getFullYear()-bd.getFullYear())*12+(dd.getMonth()-bd.getMonth());if(dd.getDate()<bd.getDate())months--;out.value=age>=0?age+'歳'+(months-age*12)+'か月':'';}
+  else out.value=age;
+}
+function setMode(m){mode=m;state.funcOverride={};document.getElementById('modePre').classList.toggle('on',m==='pre');document.getElementById('modePost').classList.toggle('on',m==='post');renderChecklist();judge();renderFuncTags();save();}
+function bx(on){return on?'<span class="box-on"></span>':'<span class="box-off"></span>';}
+function FUNC_GOAL(arr){arr=arr||[];return GOAL_ALL.map(x=>bx(arr.includes(x))+x).join('　');}
+function FUNC_PLAN(arr){arr=arr||[];return PLAN_ALL.map(x=>bx(arr.includes(x))+x).join('　');}
+function buildPrint(){
+  const f=state.fields,g=state.groups;const today=f.f_date||new Date().toISOString().slice(0,10);
+  let dx=0,all=0,must=0;
+  ITEMS[mode].forEach(grp=>grp.list.forEach(it=>{if(state.checks[K(it.c)]){all++;if(it.grp!=='other'){dx++;if(parseInt(it.c.slice(1),10)<=(mode==='pre'?9:6))must++;}}}));
+  const dxPos=dx>=2&&must>=1;const santei=dxPos;
+  const kaup=(()=>{const cw=parseFloat(state.extra.cw),ch=parseFloat(state.extra.ch);return(cw>0&&ch>0)?((cw*1000)/(ch*ch)*10).toFixed(1):'';})();
+  const rohrer=(()=>{const cw=parseFloat(state.extra.cw),ch=parseFloat(state.extra.ch);if(!(cw>0&&ch>0))return'';const m=ch/100;return(cw/(m*m*m)*10).toFixed(1);})();
+  const funcs=activeFuncTags();
+  let s1='<div class="pd-sheet"><div class="pd-title"><h1>小児口腔機能発達不全症　チェックシート</h1>'
+    +'<div class="sub">'+(mode==='pre'?'離乳完了前':'離乳完了後')+'　／　日本小児歯科学会監修フォーマット準拠（カルテ添付用）</div></div>'
+    +'<div class="pd-meta"><span>お名前：'+(f.f_name||'　　　　　　　　')+'　様</span><span>No. '+(f.f_no||'')+'</span><span>'+(f.f_age?'年齢 '+f.f_age:'')+(f.f_sex?'　'+f.f_sex:'')+'</span><span>記入日：'+today+'</span></div>';
+  ITEMS[mode].forEach(grp=>{
+    s1+='<div class="pd-row"><div class="lbl">'+grp.cls+'（'+grp.fn+'）</div><div class="val pd-chk">';
+    grp.list.forEach(it=>{
+      const on=!!state.checks[K(it.c)];let extra='';
+      if(it.idx&&on){const kj=kaup?'（'+classifyKaup(parseFloat(kaup))[0]+'）':'';const rj=(it.idx==='both'&&rohrer)?' / ローレル '+rohrer+'（'+classifyRohrer(parseFloat(rohrer))[0]+'）':'';extra=' ［カウプ '+(kaup||'—')+kj+rj+'］';}
+      if(it.memo&&on&&state.extra[K(it.c)+'_memo'])extra='（'+state.extra[K(it.c)+'_memo']+'）';
+      s1+='<span class="c">'+bx(on)+it.c+' '+it.t+extra+'</span>';
+    });
+    s1+='</div></div>';
+  });
+  s1+='<div class="pd-row"><div class="lbl">判定</div><div class="val">食べる＋話す：<b>'+dx+'</b> 項目該当　／　全体（その他含む）：<b>'+all+'</b> 項目該当<br>'
+    +bx(dxPos)+'口腔機能発達不全症の診断基準に該当（2項目以上・必須を含む）　'+bx(dxPos&&dx>=3)+'評価項目3項目以上　'+bx(dxPos&&dx===2)+'評価項目2項目</div></div>';
+  if(f.m_lip)s1+='<div class="pd-row"><div class="lbl">口唇閉鎖力</div><div class="val">'+f.m_lip+' N</div></div>';
+  s1+='<div class="pd-foot"><span>医療機関名：'+(f.m_clinic||'')+'</span><span>担当歯科医師：'+(f.m_doctor||'')+'</span></div>';
+  s1+='<div class="pd-note">※本シートは日本歯科医学会／日本小児歯科学会の評価基準に基づく院内記録です。診断は担当歯科医師が総合的に判断します。</div></div>';
+  const drink=f.m_drink?'　飲料物：'+f.m_drink:'';
+  let s2='<div class="pd-sheet"><div class="pd-title"><h1>歯と口の健康のために</h1>'
+    +'<div class="sub">歯科疾患管理・小児口腔機能管理（文書様式1）　保護者用控え</div></div>'
+    +'<div class="pd-meta"><span>お名前：'+(f.f_name||'　　　　　　　　')+'　様</span><span>No. '+(f.f_no||'')+'</span><span>'+today+'</span></div>'
+    +'<div class="pd-row"><div class="lbl">基礎疾患</div><div class="val">'+(f.m_disease||'　')+'</div></div>'
+    +'<div class="pd-row"><div class="lbl">服薬</div><div class="val">'+(f.m_med||'　')+'</div></div>'
+    +'<div class="pd-row"><div class="lbl">生活習慣</div><div class="val pd-chk">歯みがき：'+((g.m_brush||[]).join('・')||'—')+'　／　間食：'+(f.m_snack||'—')+drink+'</div></div>'
+    +'<div class="pd-grid">'
+      +'<div class="pd-row"><div class="lbl">むし歯</div><div class="val">'+(f.m_caries||'—')+'</div></div>'
+      +'<div class="pd-row"><div class="lbl">口唇閉鎖力</div><div class="val">'+(f.m_lip?f.m_lip+' N':'—')+'</div></div>'
+      +'<div class="pd-row"><div class="lbl">歯肉：プラーク・歯石</div><div class="val">'+(f.m_plaque||'—')+'</div></div>'
+      +'<div class="pd-row"><div class="lbl">歯肉：炎症</div><div class="val">'+(f.m_gingiva||'—')+'</div></div>'
+    +'</div>'
+    +'<div class="pd-row"><div class="lbl">小児口腔機能の問題</div><div class="val pd-chk">'+(dxPos?'':bx(false)+'なし　')+FUNC_TAGS.map(t=>bx(funcs.includes(t))+t).join('　')+((g.m_habit||[]).length?'<br>習癖の内容：'+g.m_habit.join('・'):'')+'</div></div>'
+    +'<div class="pd-row"><div class="lbl">改善目標</div><div class="val pd-chk">'+FUNC_GOAL(g.m_goal)+'</div></div>'
+    +'<div class="pd-row"><div class="lbl">治療の予定</div><div class="val pd-chk">'+FUNC_PLAN(g.m_plan)+'</div></div>'
+    +(f.m_memo?'<div class="pd-row"><div class="lbl">特記事項</div><div class="val">'+f.m_memo+'</div></div>':'')
+    +'<div class="pd-foot"><span>医療機関名：'+(f.m_clinic||'')+'</span><span>担当歯科医師：'+(f.m_doctor||'')+'</span></div>'
+    +'<div class="pd-note">※この治療の予定は治療開始時の方針であり、実際の治療内容や進み方により変更することがあります。<br>※定期的に管理することは、健全な永久歯列にしていくため、それを維持するために大切です。<br>公益社団法人 日本小児歯科学会監修フォーマット準拠</div></div>';
+  document.getElementById('printdoc').innerHTML=s1+s2;
+}
+function fileBase(){const f=state.fields;const nm=(f.f_name||'患者').replace(/\s+/g,'');const d=f.f_date||new Date().toISOString().slice(0,10);return nm+'_'+d+'_口腔機能管理計画';}
+function newRecord(){
+  if(!confirm('入力内容をすべて消去して新規入力を開始します。よろしいですか？'))return;
+  localStorage.removeItem(STORE);state=blankState();state.fields.f_date=new Date().toISOString().slice(0,10);mode='post';
+  document.querySelectorAll('#view-dev .minichk.on').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('#view-dev [id^="f_"],#view-dev [id^="m_"]').forEach(e=>{if(e.id!=='f_age')e.value='';});
+  document.getElementById('f_date').value=state.fields.f_date;setMode('post');calcAge();
+}
+function init(){
+  mode=state.mode||'post';
+  document.getElementById('modePre').classList.toggle('on',mode==='pre');
+  document.getElementById('modePost').classList.toggle('on',mode==='post');
+  if(!state.fields.f_date)state.fields.f_date=new Date().toISOString().slice(0,10);
+  bindFields();document.getElementById('f_date').value=state.fields.f_date;calcAge();
+  renderChecklist();judge();renderFuncTags();
+  document.getElementById('modePre').addEventListener('click',()=>setMode('pre'));
+  document.getElementById('modePost').addEventListener('click',()=>setMode('post'));
+}
+return {init,buildPrint,newRecord,fileBase};
+})();
+
+/* =========================================================
+   口腔機能低下症モジュール（成人・高齢者）CORE
+   出典：口腔機能低下症アプリ仕様書 v1（5-1〜5-4）
+   ========================================================= */
+const LOW=(function(){
+const STORE='orallow_v1';
+// 各項目：①〜⑦。methods内 kind: num / sel / kogo / odk
+// trigger:true … 管理料1の起算検査（舌圧/咀嚼能力1/咬合圧1/口腔粘膜湿潤度/口腔細菌定量2）
+// pointKey … 算定候補に出す検査点数のマスタキー
+const ITEMS=[
+ {n:'①',id:'hygiene',name:'口腔衛生状態不良',methods:[
+   {id:'tci',label:'TCI（舌苔付着率）',unit:'%',kind:'num',cmp:'>=',th:'tci',desc:'舌背を9区分し各0-3点（合計0-27点）。50%（合計9点）以上で該当。'},
+   {id:'saikin',label:'口腔細菌定量検査2',kind:'sel',opts:['—','該当','非該当'],trigger:true,pointKey:'saikin2',desc:'細菌カウンタ等による判定（該当／非該当を選択）。'},
+ ]},
+ {n:'②',id:'dry',name:'口腔乾燥',methods:[
+   {id:'moist',label:'口腔粘膜湿潤度',unit:'',kind:'num',cmp:'<',th:'shijun',trigger:true,pointKey:'shijun',desc:'口腔水分計（ムーカス等）。27.0未満で該当。'},
+   {id:'saliva',label:'唾液量（サクソンテスト 2分）',unit:'g',kind:'num',cmp:'<=',th:'saliva',desc:'2分間で2g以下で該当。'},
+ ]},
+ {n:'③',id:'bite',name:'咬合力低下',methods:[
+   {id:'teeth',label:'残存歯数',unit:'本',kind:'num',cmp:'<',th:'teeth',desc:'20本未満で該当（残根・動揺度3の歯は除く）。'},
+   {id:'kogo',label:'咬合圧検査1',unit:'N',kind:'kogo',trigger:true,pointKey:'kogoatsu1',desc:'感圧フィルム。フィルタ有350N／無500N／GC Oramo2は375N未満で該当。'},
+ ]},
+ {n:'④',id:'tonguemove',name:'舌口唇運動機能低下',methods:[
+   {id:'odk',label:'オーラルディアドコキネシス',unit:'回/秒',kind:'odk',th:'odk',desc:'/pa/ /ta/ /ka/ のいずれかが6回/秒未満で該当。'},
+ ]},
+ {n:'⑤',id:'tonguepress',name:'低舌圧',methods:[
+   {id:'zetsuatsu',label:'舌圧検査',unit:'kPa',kind:'num',cmp:'<',th:'zetsuatsu',trigger:true,pointKey:'zetsuatsu',desc:'最大舌圧30kPa未満で該当。'},
+ ]},
+ {n:'⑥',id:'chew',name:'咀嚼機能低下',methods:[
+   {id:'soshaku',label:'咀嚼能力検査1（グルコース）',unit:'mg/dL',kind:'num',cmp:'<',th:'soshaku',trigger:true,pointKey:'soshaku1',desc:'グルコース溶出量100mg/dL未満で該当。'},
+   {id:'score',label:'咀嚼能率スコア法',kind:'sel',opts:['—','0','1','2','3','4','5','6','7','8','9'],scoreHit:true,desc:'スコア0・1・2で該当。'},
+ ]},
+ {n:'⑦',id:'swallow',name:'嚥下機能低下',methods:[
+   {id:'rsst',label:'RSST（反復唾液嚥下テスト）',unit:'回',kind:'num',cmp:'<',th:'rsst',desc:'30秒間で3回未満で該当。'},
+   {id:'eat10',label:'EAT-10',unit:'点',kind:'num',cmp:'>=',th:'eat10',desc:'合計3点以上で該当。'},
+   {id:'seirei',label:'聖隷式嚥下質問紙',kind:'sel',opts:['—','A 0項目','A 1項目以上'],seireiHit:true,desc:'A（重い症状）が1項目以上で該当。'},
+ ]},
+];
+const TRIGGER_LABEL={saikin2:'口腔細菌定量検査2',shijun:'口腔粘膜湿潤度検査',kogoatsu1:'咬合圧検査1',zetsuatsu:'舌圧検査',soshaku1:'咀嚼能力検査1'};
+let state=loadState();
+function blankState(){return {fields:{},vals:{},flags:{shikkan:false,whole:false}};}
+function loadState(){try{const s=JSON.parse(localStorage.getItem(STORE));return s&&s.fields?s:blankState();}catch(e){return blankState();}}
+function save(){localStorage.setItem(STORE,JSON.stringify(state));flash();}
+let flashT;
+function flash(){const el=document.getElementById('lowSaveStat');if(!el)return;el.textContent='保存しました';el.style.color='var(--mint4)';clearTimeout(flashT);flashT=setTimeout(()=>{el.textContent='自動保存';el.style.color='';},1200);}
+function v(key){return state.vals[key];}
+
+// メソッド評価：{done:実施, hit:該当}
+function evalMethod(m){
+  if(m.kind==='num'){
+    const raw=v(m.id);if(raw===undefined||raw===''||raw===null)return{done:false,hit:false};
+    const num=parseFloat(raw);if(isNaN(num))return{done:false,hit:false};
+    const t=MASTER.th[m.th];let hit=false;
+    if(m.cmp==='<')hit=num<t;else if(m.cmp==='<=')hit=num<=t;else if(m.cmp==='>=')hit=num>=t;
+    return{done:true,hit};
+  }
+  if(m.kind==='kogo'){
+    const raw=v(m.id);const filt=v(m.id+'_filter')||'有';
+    if(raw===undefined||raw===''||raw===null)return{done:false,hit:false};
+    const num=parseFloat(raw);if(isNaN(num))return{done:false,hit:false};
+    let t=MASTER.th.kogoatsu_filter;if(filt==='無')t=MASTER.th.kogoatsu_nofilter;else if(filt==='Oramo2')t=MASTER.th.oramo2;
+    return{done:true,hit:num<t};
+  }
+  if(m.kind==='odk'){
+    const pa=v(m.id+'_pa'),ta=v(m.id+'_ta'),ka=v(m.id+'_ka');
+    const arr=[pa,ta,ka].map(x=>parseFloat(x)).filter(x=>!isNaN(x));
+    if(arr.length===0)return{done:false,hit:false};
+    return{done:true,hit:arr.some(x=>x<MASTER.th.odk)};
+  }
+  if(m.kind==='sel'){
+    const raw=v(m.id);if(!raw||raw==='—')return{done:false,hit:false};
+    if(m.scoreHit){const s=parseInt(raw,10);return{done:true,hit:s<=2};}
+    if(m.seireiHit)return{done:true,hit:raw==='A 1項目以上'};
+    return{done:true,hit:raw==='該当'};
+  }
+  return{done:false,hit:false};
+}
+// 項目評価：いずれかのメソッドで該当→該当、いずれか実施→実施
+function evalItem(it){
+  let done=false,hit=false;
+  it.methods.forEach(m=>{const r=evalMethod(m);if(r.done)done=true;if(r.hit)hit=true;});
+  return{done,hit};
+}
+function counts(){let done=0,hit=0;ITEMS.forEach(it=>{const r=evalItem(it);if(r.done)done++;if(r.hit)hit++;});return{done,hit};}
+
+function age(){
+  const b=state.fields.lf_birth,d=state.fields.lf_date||new Date().toISOString().slice(0,10);
+  if(!b)return null;const bd=new Date(b),dd=new Date(d);let a=dd.getFullYear()-bd.getFullYear();const m=dd.getMonth()-bd.getMonth();if(m<0||(m===0&&dd.getDate()<bd.getDate()))a--;return a;
+}
+
+function render(){
+  const root=document.getElementById('examlist');root.innerHTML='';
+  ITEMS.forEach(it=>{
+    const r=evalItem(it);
+    const box=document.createElement('div');box.className='exam';
+    let stat='<span class="stat">未実施</span>';
+    if(r.done)stat='<span class="stat '+(r.hit?'hit':'miss')+'">'+(r.hit?'該当':'非該当')+'</span>';
+    let body='';
+    it.methods.forEach(m=>{
+      const mr=evalMethod(m);
+      let mres='<span class="mres">未実施</span>';
+      if(mr.done)mres='<span class="mres '+(mr.hit?'hit':'miss')+'">'+(mr.hit?'該当':'非該当')+'</span>';
+      let input='';
+      if(m.kind==='num'){
+        input='<div class="field" style="flex:0 0 150px"><div class="unit"><input data-v="'+m.id+'" inputmode="decimal" value="'+(v(m.id)||'')+'">'+(m.unit?'<span class="u">'+m.unit+'</span>':'')+'</div></div>';
+      }else if(m.kind==='kogo'){
+        const filt=v(m.id+'_filter')||'有';
+        input='<div class="field" style="flex:0 0 130px"><div class="unit"><input data-v="'+m.id+'" inputmode="decimal" value="'+(v(m.id)||'')+'"><span class="u">N</span></div></div>'
+          +'<select data-v="'+m.id+'_filter" style="flex:0 0 130px;min-height:48px;border:1.5px solid var(--line);border-radius:9px;padding:0 10px">'
+          +['有','無','Oramo2'].map(o=>'<option'+(o===filt?' selected':'')+'>'+o+'</option>').join('')+'</select>';
+      }else if(m.kind==='odk'){
+        input='<div class="odk-row">'+['pa','ta','ka'].map(s=>'<div class="field"><label>/'+s+'/</label><div class="unit"><input data-v="'+m.id+'_'+s+'" inputmode="decimal" value="'+(v(m.id+'_'+s)||'')+'"><span class="u">回/秒</span></div></div>').join('')+'</div>';
+      }else if(m.kind==='sel'){
+        const cur=v(m.id)||'—';
+        input='<select data-v="'+m.id+'" style="flex:0 0 170px;min-height:48px;border:1.5px solid var(--line);border-radius:9px;padding:0 10px">'+m.opts.map(o=>'<option'+(o===cur?' selected':'')+'>'+o+'</option>').join('')+'</select>';
+      }
+      body+='<div class="method"><div class="mlabel">'+m.label+'</div><div class="mdesc">'+m.desc+'</div><div class="method-row">'+input+mres+'</div></div>';
+    });
+    box.innerHTML='<div class="exam-h"><span class="num">'+it.n+'</span><span class="nm">'+it.name+'</span>'+stat+'</div><div class="exam-b">'+body+'</div>';
+    root.appendChild(box);
+  });
+  bindVals();
+  judge();
+}
+function bindVals(){
+  document.querySelectorAll('#examlist [data-v]').forEach(el=>{
+    const key=el.dataset.v;const ev=(el.tagName==='SELECT')?'change':'input';
+    el.addEventListener(ev,()=>{state.vals[key]=el.value;save();render();});
+  });
+}
+function judge(){
+  const c=counts();
+  document.getElementById('lowDone').textContent=c.done;
+  document.getElementById('lowHit').textContent=c.hit;
+  const ver=document.getElementById('lowVerdict');ver.className='j-verdict';
+  if(c.done===0){ver.classList.add('neg');ver.innerHTML='検査値を入力してください';}
+  else if(c.hit>=3){ver.classList.add('hit');ver.innerHTML='該当項目 '+c.hit+'／実施 '+c.done+' → 口腔機能低下症の判定基準（3項目以上該当）を満たします<small>確定診断は担当歯科医師が総合的に判断します。7項目すべての検査実施が望まれます。</small>';}
+  else{ver.classList.add('neg');ver.innerHTML='該当項目 '+c.hit+'／実施 '+c.done+' → 判定基準（3項目以上）に未到達<small>2項目以下は「口腔機能低下症の疑い」として経過観察の対象。</small>';}
+  renderBill();renderTargetNote();
+}
+function isTarget(){const a=age();return (a!=null&&a>=MASTER.th.age)||!!state.flags.whole;}
+function renderTargetNote(){
+  const el=document.getElementById('lowTargetNote');const a=age();
+  const t=isTarget();const sk=!!state.flags.shikkan;
+  let msg='算定対象：'+(t?'○（'+(a!=null&&a>=MASTER.th.age?MASTER.th.age+'歳以上':'全身疾患により機能低下')+'）':'×（'+MASTER.th.age+'歳以上、または全身疾患による機能低下が必要）');
+  msg+='　／　歯科疾患管理料：'+(sk?'算定あり':'未算定');
+  if(t&&sk)msg+='　→ 口腔機能管理料の算定要件（前提）を満たします。';
+  else msg+='　→ 前提を満たさないため算定不可。';
+  el.textContent=msg;
+}
+function renderBill(){
+  const root=document.getElementById('billbox');
+  const t=isTarget(),sk=!!state.flags.shikkan;
+  if(!(t&&sk)){
+    root.innerHTML='<div class="billbox"><div class="bill-na">算定の前提（'+MASTER.th.age+'歳以上または全身疾患による機能低下、かつ歯科疾患管理料の算定）を満たしていません。上の「算定の前提」を確認してください。</div></div>';
+    return;
+  }
+  // 当該来院で実施したtrigger検査
+  const triggers=[];
+  ITEMS.forEach(it=>it.methods.forEach(m=>{if(m.trigger){const r=evalMethod(m);if(r.done)triggers.push(m.pointKey);}}));
+  const kanri1=triggers.length>0;
+  const pt=MASTER.pt;
+  let lines='';let total=0;
+  // 管理料
+  if(kanri1){lines+=bl('口腔機能管理料1',pt.kanri1);total+=pt.kanri1;}
+  else{lines+=bl('口腔機能管理料2',pt.kanri2);total+=pt.kanri2;}
+  // 実施したtrigger検査の点数（3月に1回）
+  const seen={};
+  triggers.forEach(k=>{if(seen[k])return;seen[k]=1;lines+=bl(TRIGGER_LABEL[k]+'（3月に1回）',pt[k]);total+=pt[k];});
+  // 施設基準：口腔機能管理に係る指導料
+  if(MASTER.fac.jitchi){lines+=bl('口腔機能管理に係る指導料',pt.jitchi);total+=pt.jitchi;}
+  let html='<div class="billbox"><h3>算定候補（'+(kanri1?'管理料1':'管理料2')+'）</h3>'+lines
+    +'<div class="bill-line total"><span>合計（候補）</span><span class="pt">'+total+' 点</span></div>';
+  // 排他チェック：咬合圧1 と 咀嚼能力1
+  const kogoDone=evalMethod(ITEMS[2].methods[1]).done;
+  const soshakuDone=evalMethod(ITEMS[5].methods[0]).done;
+  if(kogoDone&&soshakuDone)html+='<div class="bill-warn">咬合圧検査1と咀嚼能力検査1は同一月に同時算定できません。いずれか一方のみ算定してください（上記合計は両方を含んでいます）。</div>';
+  html+='<div class="bill-warn" style="background:var(--warm);border-left-color:var(--accent);color:var(--text);font-weight:500">点数・基準・施設基準は「設定」で変更できます。算定の可否は最新の診療報酬・施設の届出に従い必ずご確認ください。</div>';
+  html+='</div>';
+  root.innerHTML=html;
+}
+function bl(name,p){return '<div class="bill-line"><span>'+name+'</span><span class="pt">'+(p||0)+' 点</span></div>';}
+
+function bindBasic(){
+  document.querySelectorAll('#view-low [id^="lf_"]').forEach(el=>{
+    if(el.id==='lf_age')return;
+    el.value=state.fields[el.id]||'';
+    const ev=(el.tagName==='SELECT')?'change':'input';
+    el.addEventListener(ev,()=>{state.fields[el.id]=el.value;if(el.id==='lf_birth'||el.id==='lf_date')calcAge();save();judge();});
+  });
+  const fs=document.getElementById('lflag_shikkan'),fw=document.getElementById('lflag_whole');
+  fs.classList.toggle('on',!!state.flags.shikkan);fw.classList.toggle('on',!!state.flags.whole);
+  fs.addEventListener('click',()=>{state.flags.shikkan=!state.flags.shikkan;fs.classList.toggle('on',state.flags.shikkan);save();judge();});
+  fw.addEventListener('click',()=>{state.flags.whole=!state.flags.whole;fw.classList.toggle('on',state.flags.whole);save();judge();});
+}
+function calcAge(){const out=document.getElementById('lf_age');if(!out)return;const a=age();out.value=a!=null?a:'';}
+function fileBase(){const f=state.fields;const nm=(f.lf_name||'患者').replace(/\s+/g,'');const d=f.lf_date||new Date().toISOString().slice(0,10);return nm+'_'+d+'_口腔機能低下症検査';}
+function newRecord(){
+  if(!confirm('入力内容をすべて消去して新規入力を開始します。よろしいですか？'))return;
+  localStorage.removeItem(STORE);state=blankState();state.fields.lf_date=new Date().toISOString().slice(0,10);
+  document.querySelectorAll('#view-low [id^="lf_"]').forEach(e=>{if(e.id!=='lf_age')e.value='';});
+  document.getElementById('lf_date').value=state.fields.lf_date;
+  document.getElementById('lflag_shikkan').classList.remove('on');document.getElementById('lflag_whole').classList.remove('on');
+  calcAge();render();
+}
+function buildPrint(){
+  const f=state.fields;const today=f.lf_date||new Date().toISOString().slice(0,10);const a=age();
+  const c=counts();const dx=c.hit>=3;
+  let rows='';
+  ITEMS.forEach(it=>{
+    const r=evalItem(it);
+    let detail=it.methods.map(m=>{
+      const mr=evalMethod(m);if(!mr.done)return '';
+      let val='';
+      if(m.kind==='odk')val=['pa','ta','ka'].map(s=>'/'+s+'/ '+(v(m.id+'_'+s)||'—')).join('  ');
+      else if(m.kind==='kogo')val=(v(m.id)||'—')+'N（フィルタ'+(v(m.id+'_filter')||'有')+'）';
+      else val=(v(m.id)||'—')+(m.unit||'');
+      return m.label+'：'+val+'（'+(mr.hit?'該当':'非該当')+'）';
+    }).filter(Boolean).join('<br>')||'未実施';
+    rows+='<tr><td class="ctr">'+it.n+'</td><td>'+it.name+'</td><td>'+detail+'</td><td class="ctr">'+(r.done?(r.hit?'該当':'非該当'):'—')+'</td></tr>';
+  });
+  let s='<div class="pd-sheet"><div class="pd-title"><h1>口腔機能低下症　検査結果</h1>'
+    +'<div class="sub">該当項目数の集計・判定補助（ご本人控え／カルテ添付用）／日本歯科医学会 基準準拠</div></div>'
+    +'<div class="pd-meta"><span>お名前：'+(f.lf_name||'　　　　　　')+'　様</span><span>No. '+(f.lf_no||'')+'</span><span>'+(a!=null?'年齢 '+a+'歳':'')+(f.lf_sex?'　'+f.lf_sex:'')+'</span><span>検査日：'+today+'</span></div>'
+    +'<table class="pd-tbl"><tr><th class="ctr">項目</th><th>口腔機能の評価項目</th><th>検査内容・値</th><th class="ctr">判定</th></tr>'+rows+'</table>'
+    +'<div class="pd-row"><div class="lbl">判定</div><div class="val">実施 <b>'+c.done+'</b> 項目／該当 <b>'+c.hit+'</b> 項目　'
+    +(dx?'<span class="box-on"></span>口腔機能低下症の判定基準（3項目以上該当）を満たす':'<span class="box-off"></span>3項目以上に未到達（疑い・経過観察）')+'</div></div>'
+    +'<div class="pd-foot"><span>医療機関名：</span><span>担当歯科医師：</span></div>'
+    +'<div class="pd-note">※本シートは判定の補助（該当項目数の集計）であり、確定診断は担当歯科医師が総合的に判断します。問診のみでは診断しません。</div></div>';
+  document.getElementById('printdoc').innerHTML=s;
+}
+function init(){
+  if(!state.fields.lf_date)state.fields.lf_date=new Date().toISOString().slice(0,10);
+  bindBasic();document.getElementById('lf_date').value=state.fields.lf_date;calcAge();render();
+}
+return {init,buildPrint,newRecord,fileBase,refresh:render};
+})();
+
+/* =========================================================
+   設定（マスタ管理）
+   ========================================================= */
+const SETTINGS=(function(){
+function render(){
+  const pts=document.getElementById('setPoints');pts.innerHTML='';
+  Object.keys(MASTER.pt).forEach(k=>{
+    const f=document.createElement('div');f.className='set-field';
+    f.innerHTML='<label>'+PT_LABEL[k]+'</label><input type="number" inputmode="numeric" data-pt="'+k+'" value="'+MASTER.pt[k]+'">';
+    pts.appendChild(f);
+  });
+  const ths=document.getElementById('setThresholds');ths.innerHTML='';
+  Object.keys(MASTER.th).forEach(k=>{
+    const f=document.createElement('div');f.className='set-field';
+    f.innerHTML='<label>'+TH_LABEL[k]+'</label><input type="number" inputmode="decimal" step="any" data-th="'+k+'" value="'+MASTER.th[k]+'">';
+    ths.appendChild(f);
+  });
+  const fac=document.getElementById('setFacility');fac.innerHTML='';
+  Object.keys(MASTER.fac).forEach(k=>{
+    const t=document.createElement('div');t.className='set-toggle'+(MASTER.fac[k]?' on':'');
+    t.innerHTML='<span class="b"></span><label>'+FAC_LABEL[k]+'</label>';
+    t.addEventListener('click',()=>{MASTER.fac[k]=!MASTER.fac[k];t.classList.toggle('on',MASTER.fac[k]);saveMaster();});
+    fac.appendChild(t);
+  });
+  document.querySelectorAll('#setPoints [data-pt]').forEach(inp=>inp.addEventListener('change',()=>{const val=parseInt(inp.value,10);MASTER.pt[inp.dataset.pt]=isNaN(val)?0:val;saveMaster();}));
+  document.querySelectorAll('#setThresholds [data-th]').forEach(inp=>inp.addEventListener('change',()=>{const val=parseFloat(inp.value);MASTER.th[inp.dataset.th]=isNaN(val)?0:val;saveMaster();}));
+}
+function reset(){if(!confirm('点数・基準値・施設基準をすべて初期値に戻します。よろしいですか？'))return;MASTER=deepMerge(MASTER_DEFAULT,null);saveMaster();render();}
+return {render,reset};
+})();
+
+/* =========================================================
+   トップバー・ルーター配線・初期化
+   ========================================================= */
+function dispatchPrint(){
+  if(currentView==='low'){LOW.buildPrint();printWith(LOW.fileBase());}
+  else if(currentView==='dev'){DEV.buildPrint();printWith(DEV.fileBase());}
+}
+function printWith(title){
+  const orig=document.title;document.title=title;
+  const restore=()=>{document.title=orig;window.removeEventListener('afterprint',restore);};
+  window.addEventListener('afterprint',restore);
+  setTimeout(()=>window.print(),60);
+}
+function dispatchNew(){if(currentView==='low')LOW.newRecord();else if(currentView==='dev')DEV.newRecord();}
+
+document.querySelectorAll('.launch-btn').forEach(b=>b.addEventListener('click',()=>{
+  const go=b.dataset.go;showView(go);
+  if(go==='low')LOW.refresh();
+}));
+document.getElementById('btnBack').addEventListener('click',()=>{
+  if(currentView==='settings'){showView(prevView);if(prevView==='low')LOW.refresh();}
+  else showView('home');
+});
+document.getElementById('btnSettings').addEventListener('click',()=>{SETTINGS.render();showView('settings');});
+document.getElementById('btnResetMaster').addEventListener('click',SETTINGS.reset);
+document.getElementById('btnNew').addEventListener('click',dispatchNew);
+document.getElementById('btnPrint').addEventListener('click',dispatchPrint);
+
+DEV.init();
+LOW.init();
+(function(){var _sv=showView;showView=function(n){if(n!=="dev"&&n!=="settings")n="dev";_sv(n);};})();
+showView("dev");
+
+/* Service Worker（オフライン動作 / iPadホーム画面用） */
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
+}
+</script>
+</body>
+</html>

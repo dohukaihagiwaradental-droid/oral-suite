@@ -1,8 +1,10 @@
 /* Service Worker: オフライン動作用（統合アプリのシェルをキャッシュ） */
-const CACHE = 'oralsuite-v2';
+const CACHE = 'oralsuite-v3';
 const ASSETS = [
   './',
   './index.html',
+  './dev.html',
+  './manifest-dev.json',
   './manifest.json',
   './icon-180.png',
   './icon-192.png',
