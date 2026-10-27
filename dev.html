@@ -641,6 +641,35 @@ input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
       <div class="subhead">特記事項・備考</div>
       <div class="field"><textarea id="m_memo" placeholder="保護者への説明内容・観察事項など"></textarea></div>
 
+      <div class="subhead">本日の指導内容（保護者用・3枚目に印刷）</div>
+      <div class="field"><label>診療室で行った練習</label>
+        <div class="inline-checks" data-checkgroup="m_train">
+          <span class="minichk" data-v="唇のトレーニング"><span class="b"></span>唇のトレーニング</span>
+          <span class="minichk" data-v="舌のトレーニング"><span class="b"></span>舌のトレーニング</span>
+          <span class="minichk" data-v="飲み込みの練習"><span class="b"></span>飲み込みの練習</span>
+          <span class="minichk" data-v="かむ練習"><span class="b"></span>かむ練習</span>
+          <span class="minichk" data-v="鼻呼吸の練習"><span class="b"></span>鼻呼吸の練習</span>
+          <span class="minichk" data-v="姿勢の練習"><span class="b"></span>姿勢の練習</span>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>おうちでの過ごし方・食事のアドバイス</label>
+        <div class="inline-checks" data-checkgroup="m_life">
+          <span class="minichk" data-v="一口の量を少なく"><span class="b"></span>一口の量を少なく</span>
+          <span class="minichk" data-v="前歯でかじる"><span class="b"></span>前歯でかじる</span>
+          <span class="minichk" data-v="奥歯でよくかむ"><span class="b"></span>奥歯でよくかむ</span>
+          <span class="minichk" data-v="コップで飲む"><span class="b"></span>コップで飲む</span>
+          <span class="minichk" data-v="足がつく椅子・足台"><span class="b"></span>足がつく椅子・足台</span>
+          <span class="minichk" data-v="ふだん口を閉じる"><span class="b"></span>ふだん口を閉じる</span>
+          <span class="minichk" data-v="寝るときの口と姿勢"><span class="b"></span>寝るときの口と姿勢</span>
+          <span class="minichk" data-v="指しゃぶりなどの癖"><span class="b"></span>指しゃぶりなどの癖</span>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>おうちでの練習（内容と回数）</label><textarea id="m_homework" placeholder="例：ポッピング 1日10回／ボタンプル 1日3回"></textarea></div>
+      <div class="grid c2" style="margin-top:12px">
+        <div class="field"><label>次回の確認</label><input id="m_next" placeholder="例：1か月後"></div>
+        <div class="field"><label>指導した歯科衛生士（名字のみ可）</label><input id="m_hygienist" placeholder="名字"></div>
+      </div>
+
       <div class="subhead">記入者</div>
       <div class="grid c2">
         <div class="field"><label>医療機関名</label><input id="m_clinic" placeholder="医院名"></div>
@@ -974,7 +1003,19 @@ function buildPrint(){
     +(f.m_memo?'<div class="pd-row"><div class="lbl">特記事項</div><div class="val">'+f.m_memo+'</div></div>':'')
     +'<div class="pd-foot"><span>医療機関名：'+(f.m_clinic||'')+'</span><span>担当歯科医師：'+(f.m_doctor||'')+'</span></div>'
     +'<div class="pd-note">※この治療の予定は治療開始時の方針であり、実際の治療内容や進み方により変更することがあります。<br>※定期的に管理することは、健全な永久歯列にしていくため、それを維持するために大切です。<br>公益社団法人 日本小児歯科学会監修フォーマット準拠</div></div>';
-  document.getElementById('printdoc').innerHTML=s1+s2;
+  const TR_ALL=['唇のトレーニング','舌のトレーニング','飲み込みの練習','かむ練習','鼻呼吸の練習','姿勢の練習'];
+  const LF_ALL=['一口の量を少なく','前歯でかじる','奥歯でよくかむ','コップで飲む','足がつく椅子・足台','ふだん口を閉じる','寝るときの口と姿勢','指しゃぶりなどの癖'];
+  const hw=f.m_homework?f.m_homework.replace(/</g,'&lt;').replace(/\n/g,'<br>'):'<br><br><br>';
+  let s3='<div class="pd-sheet"><div class="pd-title"><h1>本日の指導内容</h1>'
+    +'<div class="sub">お口の機能のトレーニング　保護者の方へ</div></div>'
+    +'<div class="pd-meta"><span>お名前：'+(f.f_name||'　　　　　　　　')+'　様</span><span>No. '+(f.f_no||'')+'</span><span>'+today+'</span></div>'
+    +'<div class="pd-row"><div class="lbl">診療室で行った練習</div><div class="val pd-chk">'+TR_ALL.map(x=>bx((g.m_train||[]).includes(x))+x).join('　')+'</div></div>'
+    +'<div class="pd-row"><div class="lbl">おうちでの過ごし方・食事のアドバイス</div><div class="val pd-chk">'+LF_ALL.map(x=>bx((g.m_life||[]).includes(x))+x).join('　')+'</div></div>'
+    +'<div class="pd-row"><div class="lbl">おうちでの練習（内容と回数）</div><div class="val">'+hw+'</div></div>'
+    +'<div class="pd-row"><div class="lbl">次回の確認</div><div class="val">'+(f.m_next||'　')+'</div></div>'
+    +'<div class="pd-foot"><span>医療機関名：'+(f.m_clinic||'')+'</span><span>主治の歯科医師：'+(f.m_doctor||'')+'</span><span>指導した歯科衛生士：'+(f.m_hygienist||'')+'</span></div>'
+    +'<div class="pd-note">※おうちでの練習は、無理のない範囲で毎日続けましょう。わからないことは次回の来院時にお気軽にご相談ください。</div></div>';
+  document.getElementById('printdoc').innerHTML=s1+s2+s3;
 }
 function fileBase(){const f=state.fields;const nm=(f.f_name||'患者').replace(/\s+/g,'');const d=f.f_date||new Date().toISOString().slice(0,10);return nm+'_'+d+'_口腔機能管理計画';}
 function newRecord(){
