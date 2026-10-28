@@ -1,5 +1,5 @@
 /* Service Worker: オフライン動作用（統合アプリのシェルをキャッシュ） */
-const CACHE = 'oralsuite-v4';
+const CACHE = 'oralsuite-v5';
 const ASSETS = [
   './',
   './index.html',
