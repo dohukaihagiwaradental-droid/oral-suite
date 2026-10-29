@@ -1,5 +1,5 @@
 /* Service Worker: オフライン動作用（統合アプリのシェルをキャッシュ） */
-const CACHE = 'oralsuite-v5';
+const CACHE = 'oralsuite-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -13,7 +13,7 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS.map(u => new Request(u, {cache: 'reload'})))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -26,6 +26,18 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  /* 画面(HTML)はネット優先：更新がすぐ届く。圏外のときだけ保存済みを使う */
+  const isPage = req.mode === 'navigate' || req.destination === 'document';
+  if (isPage) {
+    e.respondWith(
+      fetch(req, {cache: 'no-store'}).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        return res;
+      }).catch(() => caches.match(req).then(hit => hit || caches.match('./dev.html') || caches.match('./index.html')))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(req).then(hit => {
       if (hit) return hit;
@@ -33,8 +45,6 @@ self.addEventListener('fetch', e => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
         return res;
-      }).catch(() => {
-        if (req.mode === 'navigate') return caches.match('./index.html');
       });
     })
   );
